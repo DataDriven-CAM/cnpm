@@ -1,0 +1,23 @@
+{
+  "name": "cnpm",
+  "version": "1.0.0",
+  "description": "dependency manager with or without manifests",
+  "main": "main",
+  "scripts": {
+    "zlib": "cd cpp_modules/zlib && make clean && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=dist . && make install",
+    "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install",
+    "urlcpp": "cd cpp_modules/urlcpp && mkdir -p test && cnpm install && pwd && make -f Makefile all",
+    "libgit2":"mkdir -p build && cd build && ccmake -DCMAKE_INSTALL_PREFIX=`pwd`/../dist -DCMAKE_BUILD_TYPE=Release -DOPENSSL_CRYPTO_LIBRARY=`pwd`/../../openssl/openssl/lib64/libcrypto.so -DOPENSSL_INCLUDE_DIR=`pwd`/../../openssl/openssl/include  -DOPENSSL_SSL_LIBRARY=`pwd`/../../openssl/openssl/lib64/libssl.so  .. && cmake --build . && make install"
+  },
+  "author": "rimmartin",
+  "license": "MIT",
+  "private": null,
+  "dependencies": {
+    "urlcpp": "rimmartin/urlcpp",
+    "CLI11": "CLIUtils/CLI11",
+    "openssl" : "openssl/openssl#OpenSSL_1_1_1l",
+    "libgit2" : "libgit2/libgit2",
+    "zlib" : "madler/zlib",
+    "c-plus-plus-serializer" : "goblinhack/c-plus-plus-serializer"
+  }
+}
