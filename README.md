@@ -31,7 +31,7 @@ And we should be able to get speed from the modern use of c++ and eventually mak
 
 The packages:
 
-https://github.com/libgit2/libgit2.git
-https://github.com/openssl/openssl\#OpenSSL_1_1_1l.git
+* https://github.com/libgit2/libgit2.git
+* https://github.com/openssl/openssl\#OpenSSL_1_1_1l.git
 
 are core to this project and do the heavy url lifting
