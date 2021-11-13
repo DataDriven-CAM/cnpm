@@ -49,7 +49,7 @@ namespace sylvanmats::npm{
                 std::string moduleName=std::string{key};
                 std::filesystem::path localLinkPath="./cpp_modules/"+moduleName;
                 if(!std::filesystem::exists(localLinkPath)){
-                    std::regex versionExpression(R"((\^)?((\d+)(\.(\d+)(\.(\d+))?)?))");
+                    std::regex versionExpression(R"((\^|\~)?((\d+)(\.(\d+|x)(\.(\d+|x))?)?))");
                     std::smatch versionMatch;
                     std::string version=std::string{val};
                     if (std::regex_match(version, versionMatch, versionExpression)) {

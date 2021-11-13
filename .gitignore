@@ -32,3 +32,5 @@
 *.app
 
 build
+/cnpm
+cpp_modules
