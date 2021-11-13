@@ -24,7 +24,7 @@ Usage is from help
 ./cnpm -h
 ```
 
-This will work with any language and is most useful where there are depend projects without packages.
+This will work with any language and is most useful where there are dependent projects without packages.
 
 
 And we should be able to get speed from the modern use of c++ and eventually make it parallel.
