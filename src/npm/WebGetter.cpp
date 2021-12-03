@@ -1,11 +1,25 @@
 #include <unistd.h>
 #include "npm/WebGetter.h"
+#include <sstream>
+#include <syncstream>
 
 #include "Url.h"
 
 namespace sylvanmats::reading{
 
-    bool WebGetter::operator()(std::string& urlStr, std::ostream& ss, std::function<void(std::istream& content)> apply){
+    bool WebGetter::operator()(std::string& urlStr, std::function<void(std::istream& content)> apply){
+        std::stringstream ss(std::ios_base::in | std::ios_base::out | std::ios::binary);
+        get(urlStr, ss);
+//        ss.seekp(0);
+        apply(ss);
+        return true;
+    }
+    
+    bool WebGetter::operator()(std::string& urlStr, std::ostream& ss){
+        return get(urlStr, ss);
+    }
+    
+    bool WebGetter::get(std::string& urlStr, std::ostream& ss){
     url::Url url(urlStr);
     struct addrinfo hints = {}, *infoptr;
     char port_str[16] = {};
@@ -44,7 +58,7 @@ namespace sylvanmats::reading{
             //    inet_ntoa(sockaddr_ipv4->sin_addr) );
             break;
         case AF_INET6:
-            printf("AF_INET6 (IPv6)\n");
+//            printf("AF_INET6 (IPv6)\n");
             // the InetNtop function is available on Windows Vista and later
             // sockaddr_ipv6 = (struct sockaddr_in6 *) ptr->ai_addr;
             // printf("\tIPv6 address %s\n",
@@ -146,7 +160,7 @@ namespace sylvanmats::reading{
     //printf ("SSL connection using %s\n", SSL_get_cipher (ssl));
     std::string escapedUrl=url::Url::escape_reserved_unsafe(urlStr);
 //std::cout<<"escapedUrl "<<escapedUrl<<std::endl;
-    std::string request = "GET "+url.path()+" HTTP/1.1\r\nUser-Agent: cnpm/1.0.0\r\nAccept: */*\r\nAccept-Encoding: identity\r\nHost: "+url.host()+"\r\nConnection: Keep-Alive\r\n\r\n\r\n";
+    std::string request = "GET "+url.path()+" HTTP/1.1\r\nUser-Agent: cnpm/1.0.0\r\nAccept: "+acceptValue+"\r\nAccept-Encoding: identity\r\nHost: "+url.host()+"\r\nConnection: Keep-Alive\r\n\r\n\r\n";
 //    std::cout<<"request "<<request<<std::endl;
     int status=SendPacket(request.c_str());
 //    std::cout<<"SentPacket "<<status<<std::endl;

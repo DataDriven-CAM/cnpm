@@ -17,6 +17,7 @@ namespace sylvanmats::io::json{
         friend class JsonBinder;
     protected:
         std::vector<std::string_view> p;
+        std::string s;
     public:
         path() = default;
         path(const path& orig){
@@ -24,12 +25,18 @@ namespace sylvanmats::io::json{
             p.push_back(sv);
 //            std::cout<<orig.p[0]<<" cp constructor "<<p[0]<<std::endl;
         };
+        path(const char* c){
+//            std::cout<<"path(const char* c) "<<c<<std::endl;
+            s=std::string(c);
+            this->p.push_back(std::string_view(s));
+        };
         
         virtual ~path() = default;
         
         const path& operator=(const char* c){
             //if(!this->p.empty())this->p.clear();
-            this->p.emplace_back(std::string(c));
+            //this->p.emplace_back(std::string(c));
+//           std::cout<<"=(const char* c) "<<this->p.size()<<std::endl;
             return *this;
         }
         
@@ -64,6 +71,11 @@ namespace sylvanmats::io::json{
         JsonBinder(const JsonBinder& orig) =  delete;
         virtual ~JsonBinder()= default;
         
+        void operator ()(std::istream& is){
+            this->jsonContent=std::string((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+            bind(0);
+        }
+        
         void operator ()(std::string& jsonContent){
             this->jsonContent=jsonContent;
             bind(0);
@@ -79,7 +91,7 @@ namespace sylvanmats::io::json{
                     std::ranges::reverse_view rv {vps};
                     for(auto& p : rv | std::views::filter([&s](std::tuple<unsigned int, unsigned int, std::string_view, std::any>& p){return std::get<0>(p)==std::get<1>(s);})){
                         std::string::size_type offset=std::to_address(std::get<2>(p).begin())-std::to_address(jsonContent.begin());
-                        std::string::size_type nl=jsonContent.find('\n', offset);
+                        std::string::size_type nl=jsonContent.find_first_of(",\n}{", offset);
                         if(nl==std::string::npos)nl=offset;
                         std::string::size_type originalSize=jsonContent.length();
                         jsonContent.insert(nl, ",\n    \""+key+"\": \""+value+"\"");
@@ -110,8 +122,8 @@ namespace sylvanmats::io::json{
                         std::string::size_type distance2=(itS!=objStart.end()) ? std::distance(objStart.begin(), itS): objStart.size();
                         std::string::size_type start=std::to_address(jsonContent.data());
                         std::string::size_type offset=std::to_address(std::get<2>(p).data())-start;
-                        std::string::size_type previousnl=jsonContent.rfind('\n', offset);
-                        std::string::size_type nl=jsonContent.find('\n', offset);
+                        std::string::size_type previousnl=jsonContent.find_last_of(",\n{", offset);
+                        std::string::size_type nl=jsonContent.find_first_of(",\n}", offset);
                         if(nl==std::string::npos)nl=previousnl;
                         jsonContent.erase(previousnl, nl-previousnl);
                         if(distance<vps.size())vps.resize(distance);
@@ -124,9 +136,24 @@ namespace sylvanmats::io::json{
             return false;
         }
         
+        //get
+        void operator ()(path& p, std::function<void(std::any& v)> apply){
+            for(auto d : p.p){
+//                std::cout<<"d: "<<d<<std::endl;
+//                for(auto s : objStart | std::views::filter([&d](std::tuple<unsigned int, unsigned int, unsigned int, std::string_view, unsigned int>& s){return std::get<3>(s).compare(d)==0;})){
+                    //std::cout<<std::get<1>(s)<<" here "<<std::get<2>(s)<<" "<<std::get<3>(s)<<std::endl;
+                    for(auto p : vps | std::views::filter([&d](std::tuple<unsigned int, unsigned int, std::string_view, std::any>& p){return std::get<0>(p)==0 && std::get<2>(p).compare(d)==0;})){
+                        //std::cout<<"\t"<<std::get<1>(p)<<" "<<std::get<2>(p)<<std::endl;
+                        apply(std::get<3>(p));
+                    }
+//                }
+            }
+        }
+        
+        //traverse
         void operator ()(path& p, std::function<void(std::string_view& key, std::any& v)> apply){
             for(auto d : p.p){
-                std::cout<<"d: "<<d<<std::endl;
+//                std::cout<<"d: "<<d<<std::endl;
                 for(auto s : objStart | std::views::filter([&d](std::tuple<unsigned int, unsigned int, unsigned int, std::string_view, unsigned int>& s){return std::get<3>(s).compare(d)==0;})){
                     //std::cout<<std::get<1>(s)<<" here "<<std::get<2>(s)<<" "<<std::get<3>(s)<<std::endl;
                     for(auto p : vps | std::views::filter([&s](std::tuple<unsigned int, unsigned int, std::string_view, std::any>& p){return std::get<0>(p)==std::get<1>(s);})){

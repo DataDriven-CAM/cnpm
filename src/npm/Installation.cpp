@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <filesystem>
-#include <regex>
 #include <ranges>
 #include <algorithm>
 
+#include "npm/SymanticVersioning.h"
 #include "npm/WebGetter.h"
 #include "npm/TGZDecompressor.h"
 
@@ -43,54 +43,41 @@ namespace sylvanmats::npm{
     
     void Installation::install(std::string_view& key, std::string_view& val){
             url::Url url(std::string{val});
-            std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
+//            std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
             bool hitVersion=false;
             if(url.host().empty()){
                 std::string moduleName=std::string{key};
                 std::filesystem::path localLinkPath="./cpp_modules/"+moduleName;
                 if(!std::filesystem::exists(localLinkPath)){
-                    std::regex versionExpression(R"((\^|\~)?((\d+)(\.(\d+|x)(\.(\d+|x))?)?))");
-                    std::smatch versionMatch;
-                    std::string version=std::string{val};
-                    if (std::regex_match(version, versionMatch, versionExpression)) {
-                        std::cout<<"versionMatch? "<<versionMatch.size()<<std::endl;
-                        if (versionMatch.size() >= 4) {
-                            std::ssub_match base_sub_match = versionMatch[3];
-                            std::string base = base_sub_match.str();
-                            std::cout << val << " has a major of " << base << '\n';
-                        }
-                        if (versionMatch.size() >= 3) {
-                            std::ssub_match base_sub_match = versionMatch[2];
-                            std::string base = base_sub_match.str();
-                            std::cout << val << " version " << base << '\n';
-                            sylvanmats::reading::WebGetter webGetter;
-                            std::string uri = "https://registry.npmjs.org/"+moduleName+"/-/"+moduleName+"-"+base+".tgz";
-                            std::cout<<"uri "<<uri<<std::endl;
-                            std::string fileName=moduleName+"-"+base+".tgz";
-                            std::filesystem::path tmpPath=std::filesystem::temp_directory_path()/fileName;
-                            std::cout<<"t file "<<tmpPath<<std::endl;
-                            std::ofstream tgzFile(tmpPath.c_str(), std::ios::binary);
-                            webGetter(uri, tgzFile, [&moduleName, &base](std::istream& is){
-                            });
-                            tgzFile.close();
-                            TGZDecompressor tgzDecompressor;
+                    SymanticVersioning symanticVersioning;
+                    symanticVersioning(val, [&](std::string_view base, std::string_view wildcard){
+//                        std::cout << val << " version " << base << '\n';
+                        sylvanmats::reading::WebGetter webGetter;
+                        std::string uri = "https://registry.npmjs.org/"+moduleName+"/-/"+moduleName+"-"+std::string(base)+".tgz";
+//                        std::cout<<"uri "<<uri<<std::endl;
+                        std::string fileName=moduleName+"-"+std::string(base)+".tgz";
+                        std::filesystem::path tmpPath=std::filesystem::temp_directory_path()/fileName;
+//                        std::cout<<"t file "<<tmpPath<<std::endl;
+                        std::ofstream tgzFile(tmpPath.c_str(), std::ios::binary);
+                        webGetter(uri, tgzFile);
+                        tgzFile.close();
+                        TGZDecompressor tgzDecompressor;
 //                                    tgzDecompressor(is, tmpPath);
-                            tgzDecompressor(tmpPath, [&](std::filesystem::path& newPath, std::ostream& content){
-                                std::filesystem::path localPath=home+"/.cnpm/cpp_modules/"+moduleName;
-                                if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
-                                localPath/=newPath;
-                                std::cout<<" "<<localPath.parent_path()<<" "<<localPath.filename()<<" "<<content.tellp()<<std::endl;
-                                if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
-                                if(!std::filesystem::exists(localPath)){
-                                    std::ofstream innerFile(localPath.c_str(), std::ios::binary);
-                                    std::istream is(dynamic_cast<std::stringbuf*>(content.rdbuf()));
-                                    innerFile<<dynamic_cast<std::stringbuf*>(content.rdbuf())->str();
-                                    innerFile.flush();
-                                }
-                            });
-                        }
+                        tgzDecompressor(tmpPath, [&](std::filesystem::path& newPath, std::ostream& content){
+                            std::filesystem::path localPath=home+"/.cnpm/cpp_modules/"+moduleName+"-"+std::string(base);
+                            if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                            localPath/=newPath;
+//                            std::cout<<" "<<localPath.parent_path()<<" "<<localPath.filename()<<" "<<content.tellp()<<std::endl;
+                            if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
+                            if(!std::filesystem::exists(localPath)){
+                                std::ofstream innerFile(localPath.c_str(), std::ios::binary);
+                                std::istream is(dynamic_cast<std::stringbuf*>(content.rdbuf()));
+                                innerFile<<dynamic_cast<std::stringbuf*>(content.rdbuf())->str();
+                                innerFile.flush();
+                            }
+                        });
                         hitVersion=true;
-                    }
+                    });
                 }
             }
             if(url.syntax_ok() && !hitVersion){
@@ -98,6 +85,7 @@ namespace sylvanmats::npm{
                 std::string moduleName=std::string{key};
                 std::filesystem::path localLinkPath="./cpp_modules/"+moduleName;
                 std::filesystem::path localPath=home+"/.cnpm/cpp_modules/"+moduleName;
+                std::string oid="";
                 if(!std::filesystem::exists(localPath)){
                     git_libgit2_init();
                     //git_libgit2_opts(GIT_OPT_SET_SSL_CERT_LOCATIONS, NULL, cnpmHome.c_str());
@@ -141,8 +129,53 @@ namespace sylvanmats::npm{
                     int err=git_clone(&gitRepository, uri.c_str(), localPath.c_str(), &opts);
                     if(err!=0)
                         std::cout<<"err "<<err<<" "<<git_error_last()->klass<<" "<<git_error_last()->message<<std::endl;
+                    else{
+                        const char *branch = NULL;
+                        git_reference *head = NULL;
+
+                        err = git_repository_head(&head, gitRepository);
+
+                        if (err == GIT_EUNBORNBRANCH || err == GIT_ENOTFOUND)
+                          branch = NULL;
+                        else if (!err) {
+                          branch = git_reference_shorthand(head);
+                        }
+
+                          printf("## %s\n", branch ? branch : "HEAD (no branch)");
+
+                        git_reference_free(head);
+                        
+                        git_remote *remote = NULL;
+                        err = git_remote_lookup(&remote, gitRepository, uri.c_str());
+                        if (err < 0)
+                            err = git_remote_create_anonymous(&remote, gitRepository, uri.c_str());
+                            if (err >= 0) {
+                                const git_remote_head **refs;
+                                git_remote_callbacks callbacks = GIT_REMOTE_CALLBACKS_INIT;
+                                err = git_remote_connect(remote, GIT_DIRECTION_FETCH, &callbacks, NULL, NULL);
+                                if (err >= 0){
+                                    size_t refs_len;
+                                    if (git_remote_ls(&refs, &refs_len, remote) >= 0){
+                                        bool hit=false;
+                                        for (size_t i = 0; !hit && i < refs_len; i++) {
+                                          char git_oid[GIT_OID_HEXSZ + 1] = {0};
+                                          git_oid_fmt(git_oid, &refs[i]->oid);
+                                          printf("%s\t%s\n", git_oid, refs[i]->name);
+                                          if(std::string("HEAD").compare(refs[i]->name)==0){
+                                              oid=std::string(git_oid);
+                                              hit=true;
+                                          }
+                                        }
+                                    }
+                                }
+                                else std::cout<<"err2 "<<err<<" "<<git_error_last()->klass<<" "<<git_error_last()->message<<std::endl;
+                            }
+                            else std::cout<<"err1 "<<err<<" "<<git_error_last()->klass<<" "<<git_error_last()->message<<std::endl;
+                        git_remote_free(remote);
+                    }
                     git_libgit2_shutdown();
                 }
+                std::cout<<"oid "<<oid<<std::endl;
                 if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
             }
         

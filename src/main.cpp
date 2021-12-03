@@ -18,6 +18,7 @@
 #include "npm/Installation.h"
 #include "npm/Addition.h"
 #include "npm/Removal.h"
+#include "npm/Outdated.h"
 #include "io/json/JsonBinder.h"
 
 int main(int argc, char** argv, char **envp) {
@@ -62,9 +63,7 @@ int main(int argc, char** argv, char **envp) {
     bool update=false;
     if(add){
         sylvanmats::npm::Addition addition;
-        sylvanmats::io::json::path jp;
-        std::string s=(dev) ? "devDependencies" :"dependencies";
-        jp=s;
+        sylvanmats::io::json::path jp=(dev) ? "devDependencies" :"dependencies";
         if(addition(jsonBinder, jp, packageName)){
             //filename="test-"+filename;
             std::ofstream o(filename.c_str());
@@ -74,9 +73,7 @@ int main(int argc, char** argv, char **envp) {
     }
     else if(remove){
         sylvanmats::npm::Removal removal;
-        sylvanmats::io::json::path jp;
-        std::string s=(dev) ? "devDependencies" :"dependencies";
-        jp=s;
+        sylvanmats::io::json::path jp=(dev) ? "devDependencies" :"dependencies";
         if(removal(jsonBinder, jp, packageName)){
             //filename="test-"+filename;
             std::ofstream o(filename.c_str());
@@ -85,24 +82,34 @@ int main(int argc, char** argv, char **envp) {
         }
     }
     else if(init){//waiting for <format>
+        std::cout<<"Waiting for <format> in c++ compiler "<<std::endl;
+    }
+    else if(link){
+        std::filesystem::path localPath=packageName;
+        std::string moduleName=localPath.filename().string();
+        std::filesystem::path localLinkPath="./cpp_modules/"+moduleName;
+        if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath)){
+            std::filesystem::create_directory_symlink(localPath, localLinkPath);
+        }
+    }
+    else if(outdated){
+        sylvanmats::npm::Outdated outdated;
+        sylvanmats::io::json::path jp="dependencies";
+        outdated(jsonBinder, jp);
+        sylvanmats::io::json::path jp2="devDependencies";
+        outdated(jsonBinder, jp2);
     }
     
     if(install || update){
         sylvanmats::npm::Installation installation;
-        sylvanmats::io::json::path jp;
-        std::string s("dependencies");
-        jp=s;
+        sylvanmats::io::json::path jp="dependencies";
         installation(jsonBinder, jp);
-        s="devDependencies";
-        sylvanmats::io::json::path jp2;
-        jp2=s;
+        sylvanmats::io::json::path jp2="devDependencies";
         installation(jsonBinder, jp2);
         
     }
     if(test){
-        sylvanmats::io::json::path jp;
-        std::string s("scripts");
-        jp=s;
+        sylvanmats::io::json::path jp="scripts";
         jsonBinder(jp, [](std::string_view& key, std::any& val){
             if(key.compare("test")==0){
                 std::string command{std::any_cast<std::string_view>(val)};
@@ -115,9 +122,7 @@ int main(int argc, char** argv, char **envp) {
     }
     for(auto& o : positional){
         std::cout<<"pos scriptKeys: "<<o<<std::endl;
-        sylvanmats::io::json::path jp;
-        std::string s("scripts");
-        jp=s;
+        sylvanmats::io::json::path jp="scripts";
         jsonBinder(jp, [&o](std::string_view& key, std::any& val){
             if(o.compare(key)==0){
                 std::cout<<"o "<<o<<" "<<key<<std::endl;

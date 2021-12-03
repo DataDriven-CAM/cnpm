@@ -22,7 +22,7 @@ namespace sylvanmats::npm{
     
     bool Addition::operator()(sylvanmats::io::json::JsonBinder& jb, sylvanmats::io::json::path type, std::string packageName){
         url::Url url(packageName);
-        std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
+//        std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
         bool hitVersion=false;
         if(url.syntax_ok() && !hitVersion){
             unsigned int index=url.path().rfind('/');

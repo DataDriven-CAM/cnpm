@@ -277,16 +277,19 @@ namespace sylvanmats::reading{
             int port = 443;
             SSL *ssl;
             int sock;
-
+            std::string acceptValue;
     public:
-        WebGetter() = default;
+        WebGetter(std::string acceptValue="*/*"): acceptValue (acceptValue) {};
         WebGetter(const WebGetter& orig) = delete;
         virtual ~WebGetter() = default;
 
-        bool operator()(std::string& urlStr, std::ostream& ss, std::function<void(std::istream& content)> apply);
+        bool operator()(std::string& urlStr, std::function<void(std::istream& content)> apply);
+        bool operator()(std::string& urlStr, std::ostream& ss);
+    protected:
+        bool get(std::string& urlStr, std::ostream& ss);
         generator<std::pair<int, char *>> read(){
-            int len=1024;
-                len=SSL_read(ssl, buf, 1024);
+            int len=32768;
+                len=SSL_read(ssl, buf, 32768);
                 if(len>=0)buf[len]=0;
                 //printf("%s",buf);
                 //fprintf(fp, "%s",buf);
