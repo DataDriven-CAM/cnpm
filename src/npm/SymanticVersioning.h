@@ -6,8 +6,10 @@
 
 namespace sylvanmats::npm{
     class SymanticVersioning{
+    protected:
+        bool update;
     public:
-        SymanticVersioning() = default;
+        SymanticVersioning(bool update=false) : update (update) {};
         SymanticVersioning(const SymanticVersioning* orig) = delete;
         virtual ~SymanticVersioning() = default;
     public:
@@ -45,7 +47,8 @@ namespace sylvanmats::npm{
                     std::ssub_match base_sub_match = versionMatch[1];
                     prefix = base_sub_match.str();
                 }
-                if(prefix.compare("^")==0)wildcard=major+"."+minor+".x";
+                if(update && prefix.compare("^")==0)patch="x";
+                wildcard=major+"."+minor+"."+patch;
 //                std::cout << val << " becomes " << wildcard <<" "<<major<<" "<<minor<<" "<<patch<<" "<< '\n';
                 apply(std::string_view{version}, std::string_view{wildcard});
             }

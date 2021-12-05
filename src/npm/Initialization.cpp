@@ -4,10 +4,10 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation() : home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Initialization::Initialization() : home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
-    sylvanmats::io::json::JsonBinder Installation::operator()(std::string packageName){
+    sylvanmats::io::json::JsonBinder Initialization::operator()(std::string packageName){
         sylvanmats::io::json::JsonBinder jsonBinder;
         std::filesystem::path currentPath=std::filesystem::current_path();
         std::cout<<"name? ("<<currentPath.filename()<<"): ";

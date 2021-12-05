@@ -16,12 +16,12 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation() : home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Installation::Installation(sylvanmats::io::json::path type) : type (type), home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Installation::operator()(std::string& packageName){
         url::Url url(packageName);
-        std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
+//        std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
         bool hitVersion=false;
         if(url.syntax_ok() && !hitVersion){
             unsigned int index=url.path().rfind('/');
@@ -33,8 +33,8 @@ namespace sylvanmats::npm{
         }
     }
     
-    void Installation::operator()(sylvanmats::io::json::JsonBinder& jb, sylvanmats::io::json::path p){
-        jb(p, [&](std::string_view& key, std::any& v){
+    void Installation::operator()(sylvanmats::io::json::JsonBinder& jb){
+        jb(type, [&](std::string_view& key, std::any& v){
 //            std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
             std::string_view val{std::any_cast<std::string_view>(v)};
             install(key, val);
@@ -42,20 +42,30 @@ namespace sylvanmats::npm{
     }
     
     void Installation::install(std::string_view& key, std::string_view& val){
+            if(depth>=2)return;
             url::Url url(std::string{val});
-//            std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
+//            std::cout<<val<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
             bool hitVersion=false;
             if(url.host().empty()){
                 std::string moduleName=std::string{key};
-                std::filesystem::path localLinkPath="./cpp_modules/"+moduleName;
+                std::string scope="";
+                if(moduleName.length()>0 && moduleName.at(0)=='@'){
+                    unsigned int offset=moduleName.find('/');
+                    if(offset!=std::string::npos){
+                        scope=moduleName.substr(1, offset-1);
+                        moduleName=moduleName.substr(offset+1);
+                    }
+                }
+                std::filesystem::path localLinkPath=(!scope.empty())? "./cpp_modules/"+scope+"/"+moduleName : "./cpp_modules/"+moduleName;
                 if(!std::filesystem::exists(localLinkPath)){
+                    if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
                     SymanticVersioning symanticVersioning;
                     symanticVersioning(val, [&](std::string_view base, std::string_view wildcard){
-//                        std::cout << val << " version " << base << '\n';
+                        std::cout << val << " version " << base<< " "<< wildcard << '\n';
                         sylvanmats::reading::WebGetter webGetter;
-                        std::string uri = "https://registry.npmjs.org/"+moduleName+"/-/"+moduleName+"-"+std::string(base)+".tgz";
-//                        std::cout<<"uri "<<uri<<std::endl;
-                        std::string fileName=moduleName+"-"+std::string(base)+".tgz";
+                        std::string uri =(!scope.empty()) ? "https://registry.npmjs.org/@"+scope+"/"+moduleName+"/-/"+moduleName+"-"+std::string(wildcard)+".tgz" : "https://registry.npmjs.org/"+moduleName+"/-/"+moduleName+"-"+std::string(wildcard)+".tgz";
+                        std::cout<<"uri "<<uri<<std::endl;
+                        std::string fileName=moduleName+"-"+std::string(wildcard)+".tgz";
                         std::filesystem::path tmpPath=std::filesystem::temp_directory_path()/fileName;
 //                        std::cout<<"t file "<<tmpPath<<std::endl;
                         std::ofstream tgzFile(tmpPath.c_str(), std::ios::binary);
@@ -64,7 +74,8 @@ namespace sylvanmats::npm{
                         TGZDecompressor tgzDecompressor;
 //                                    tgzDecompressor(is, tmpPath);
                         tgzDecompressor(tmpPath, [&](std::filesystem::path& newPath, std::ostream& content){
-                            std::filesystem::path localPath=home+"/.cnpm/cpp_modules/"+moduleName+"-"+std::string(base);
+                            std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/cpp_modules/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/cpp_modules/"+moduleName+"-"+std::string(base);
+                            if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
                             if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
                             localPath/=newPath;
 //                            std::cout<<" "<<localPath.parent_path()<<" "<<localPath.filename()<<" "<<content.tellp()<<std::endl;
@@ -79,12 +90,21 @@ namespace sylvanmats::npm{
                         hitVersion=true;
                     });
                 }
+                else hitVersion=true;
             }
             if(url.syntax_ok() && !hitVersion){
                 std::string uri=(url.host().empty()) ? "git://github.com/"+url.path()+".git" : url.as_string();
                 std::string moduleName=std::string{key};
-                std::filesystem::path localLinkPath="./cpp_modules/"+moduleName;
-                std::filesystem::path localPath=home+"/.cnpm/cpp_modules/"+moduleName;
+                std::string scope="";
+                if(moduleName.length()>0 && moduleName.at(0)=='@'){
+                    unsigned int offset=moduleName.find('/');
+                    if(offset!=std::string::npos){
+                        scope=moduleName.substr(1, offset-1);
+                        moduleName=moduleName.substr(offset+1);
+                    }
+                }
+                std::filesystem::path localLinkPath=(!scope.empty()) ? "./cpp_modules/"+scope+"/"+moduleName : "./cpp_modules/"+moduleName;
+                std::filesystem::path localPath= (!scope.empty())? home+"/.cnpm/cpp_modules/"+scope+"/"+moduleName : home+"/.cnpm/cpp_modules/"+moduleName;
                 std::string oid="";
                 if(!std::filesystem::exists(localPath)){
                     git_libgit2_init();
@@ -175,8 +195,23 @@ namespace sylvanmats::npm{
                     }
                     git_libgit2_shutdown();
                 }
-                std::cout<<"oid "<<oid<<std::endl;
+                if(!oid.empty())std::cout<<"oid "<<oid<<std::endl;
+                if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
                 if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                if(depth<2)
+                    for(auto& p: std::filesystem::directory_iterator(localLinkPath)){
+                        if(p.path().filename().compare("package.json")==0 && std::filesystem::exists(p.path())){
+                            std::cout<<depth<<" "<<p.path()<<std::endl;
+                            sylvanmats::io::json::JsonBinder jsonBinder;
+                            std::ifstream is(p.path());
+                            jsonBinder(is);
+                            depth++;
+                            this->operator()(jsonBinder);
+                            depth--;
+                            std::cout<<"depth "<<depth<<std::endl;
+                        }
+                    }
+                
             }
         
     }

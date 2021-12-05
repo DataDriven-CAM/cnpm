@@ -17,15 +17,17 @@ namespace sylvanmats::npm{
 
     class Installation{
     protected:
+        sylvanmats::io::json::path type;
         std::string home;
-        std::string cnpmHome;        
+        std::string cnpmHome;
+        unsigned int depth=0;
     public:
-        Installation();
+        Installation(sylvanmats::io::json::path type);
         Installation(const Installation& orig) =  delete;
         virtual ~Installation() = default;
     public:
         void operator()(std::string& packageName);
-        void operator()(sylvanmats::io::json::JsonBinder& jb, sylvanmats::io::json::path type);
+        void operator()(sylvanmats::io::json::JsonBinder& jb);
     protected:
         void install(std::string_view& key, std::string_view& val);
     };

@@ -101,11 +101,12 @@ int main(int argc, char** argv, char **envp) {
     }
     
     if(install || update){
-        sylvanmats::npm::Installation installation;
         sylvanmats::io::json::path jp="dependencies";
-        installation(jsonBinder, jp);
+        sylvanmats::npm::Installation installation(jp);
+        installation(jsonBinder);
         sylvanmats::io::json::path jp2="devDependencies";
-        installation(jsonBinder, jp2);
+        sylvanmats::npm::Installation installation2(jp2);
+        installation2(jsonBinder);
         
     }
     if(test){

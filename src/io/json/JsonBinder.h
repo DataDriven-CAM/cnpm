@@ -139,14 +139,10 @@ namespace sylvanmats::io::json{
         //get
         void operator ()(path& p, std::function<void(std::any& v)> apply){
             for(auto d : p.p){
-//                std::cout<<"d: "<<d<<std::endl;
-//                for(auto s : objStart | std::views::filter([&d](std::tuple<unsigned int, unsigned int, unsigned int, std::string_view, unsigned int>& s){return std::get<3>(s).compare(d)==0;})){
-                    //std::cout<<std::get<1>(s)<<" here "<<std::get<2>(s)<<" "<<std::get<3>(s)<<std::endl;
-                    for(auto p : vps | std::views::filter([&d](std::tuple<unsigned int, unsigned int, std::string_view, std::any>& p){return std::get<0>(p)==0 && std::get<2>(p).compare(d)==0;})){
-                        //std::cout<<"\t"<<std::get<1>(p)<<" "<<std::get<2>(p)<<std::endl;
-                        apply(std::get<3>(p));
-                    }
-//                }
+                for(auto p : vps | std::views::filter([&d](std::tuple<unsigned int, unsigned int, std::string_view, std::any>& p){return std::get<0>(p)==0 && std::get<2>(p).compare(d)==0;})){
+                    //std::cout<<"\t"<<std::get<1>(p)<<" "<<std::get<2>(p)<<std::endl;
+                    apply(std::get<3>(p));
+                }
             }
         }
         

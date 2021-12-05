@@ -34,7 +34,7 @@ namespace sylvanmats::npm{
             bool hitVersion=false;
             if(url.host().empty()){
                 std::string moduleName{key};
-                SymanticVersioning symanticVersioning;
+                SymanticVersioning symanticVersioning(true);
                 symanticVersioning(val, [&moduleName, &hitVersion, &currentPackageName](std::string_view base, std::string_view wildcard){
                     if(base.compare(wildcard)==0)return;
                     sylvanmats::reading::WebGetter webGetter;
