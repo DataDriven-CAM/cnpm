@@ -43,6 +43,8 @@ int main(int argc, char** argv, char **envp) {
     add.add_flag("-D,--save-dev", dev, "Save package to your 'devDependencies'");
     remove.add_flag("-D,--save-dev", dev, "Save package to your 'devDependencies'");
     CLI::App &test = *app.add_subcommand("t,test", R"(Runs a package's "test" script, if one was provided)");
+    app.set_config("--config", cnpmHome+"/config.toml", "Read a toml file");
+    app.add_option("module-directory")->group("");
     
     CLI11_PARSE(app, argc, argv);
     

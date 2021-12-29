@@ -25,7 +25,7 @@ build/src/npm/WebGetter.o: src/npm/WebGetter.cpp
 
 build/src/main.o: build/src/npm/Outdated.o
 	
-LDFLAGS= -Wl,-rpath,"$$ORIGIN/cpp_modules/openssl/openssl/lib64":"`pwd`/cpp_modules/openssl/openssl/lib64":"`pwd`/cpp_modules/libgit2/dist/lib" -L./cpp_modules/libgit2/dist/lib -L./cpp_modules/urlcpp -L./cpp_modules/openssl/openssl/lib64 -Lcpp_modules/zlib/dist/lib -lurlcpp -lgit2 -lcrypto -lssl -lz
+LDFLAGS= -Wl,-rpath,"$$ORIGIN/cpp_modules/openssl/openssl/lib64":"`pwd`/cpp_modules/openssl/openssl/lib64":"`pwd`/cpp_modules/libgit2/dist/lib":"`pwd`/cpp_modules/urlcpp":"/home/roger/Software/gcc-11.2.0/dist/lib64" -L./cpp_modules/libgit2/dist/lib -L./cpp_modules/urlcpp -L./cpp_modules/openssl/openssl/lib64 -Lcpp_modules/zlib/dist/lib -lurlcpp -lgit2 -lcrypto -lssl -lz
 CXXFLAGS=-std=c++2b -O3 -fpermissive -I./src -I./cpp_modules/c-plus-plus-serializer -I./cpp_modules/urlcpp  -I./cpp_modules/openssl/openssl/include -I./cpp_modules/CLI11/include  -I./cpp_modules/json/include  -I./cpp_modules/libgit2/dist/include
 build/src/main.o: src/main.cpp
 	$(CXX) $(CXXFLAGS) -o build/src/main.o -c src/main.cpp
