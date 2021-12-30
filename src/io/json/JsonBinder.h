@@ -58,8 +58,28 @@ namespace sylvanmats::io::json{
             return p;
         }
 
+        friend std::ostream& operator<<(std::ostream& s, path& p) {
+        for(auto p : p.p)
+          s <<"/"<< p;
+          return s;
+        }
     };
     
+    enum{
+        OBJ_BRACE,
+        OBJ_SIZE,
+        OBJ_DEPTH,
+        KEY,
+        KEY_INDEX
+    };
+
+    enum{
+        OBJ_INDEX,
+        PAIR_DEPTH,
+        PAIR_KEY,
+        PAIR_INDEX
+    };
+
     class JsonBinder{
     protected:
         std::string jsonContent="";
@@ -158,6 +178,19 @@ namespace sylvanmats::io::json{
                     }
                 }
             }
+        }
+        
+        //traverse sibling
+        void operator ()(path& p, std::string_view sibling, std::function<void(std::string_view& key, std::any& v)> apply){
+//            for(auto d : p.p){
+                for(auto s : objStart | std::views::filter([&sibling](std::tuple<unsigned int, unsigned int, unsigned int, std::string_view, unsigned int>& s){return std::get<3>(s).compare(sibling)==0;})){
+//                    std::cout<<std::get<OBJ_SIZE>(s)<<" here "<<std::get<OBJ_DEPTH>(s)<<" "<<std::get<KEY>(s)<<std::endl;
+                    for(auto p : vps | std::views::filter([&s](std::tuple<unsigned int, unsigned int, std::string_view, std::any>& p){return std::get<OBJ_INDEX>(p)==std::get<OBJ_SIZE>(s);})){
+                        //std::cout<<"\t"<<std::get<1>(p)<<" "<<std::get<2>(p)<<std::endl;
+                        apply(std::get<PAIR_KEY>(p), std::get<PAIR_INDEX>(p));
+                    }
+                }
+//            }
         }
         
     protected:

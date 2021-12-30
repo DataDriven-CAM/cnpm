@@ -16,7 +16,7 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation(sylvanmats::io::json::path type) : type (type), home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Installation::Installation(std::string& moduleDirectory, sylvanmats::io::json::path type) : moduleDirectory (moduleDirectory), type (type), home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Installation::operator()(std::string& packageName){
@@ -35,7 +35,7 @@ namespace sylvanmats::npm{
     
     void Installation::operator()(sylvanmats::io::json::JsonBinder& jb){
         jb(type, [&](std::string_view& key, std::any& v){
-//            std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
+//            if(key.compare("axios")==0)std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
             std::string_view val{std::any_cast<std::string_view>(v)};
             install(key, val);
         });
@@ -47,16 +47,8 @@ namespace sylvanmats::npm{
 //            std::cout<<val<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
             bool hitVersion=false;
             if(url.host().empty()){
-                std::string moduleName=std::string{key};
-                std::string scope="";
-                if(moduleName.length()>0 && moduleName.at(0)=='@'){
-                    unsigned int offset=moduleName.find('/');
-                    if(offset!=std::string::npos){
-                        scope=moduleName.substr(1, offset-1);
-                        moduleName=moduleName.substr(offset+1);
-                    }
-                }
-                std::filesystem::path localLinkPath=(!scope.empty())? "./cpp_modules/"+scope+"/"+moduleName : "./cpp_modules/"+moduleName;
+                auto&& [scope, moduleName]=parseModuleName(key);
+                std::filesystem::path localLinkPath=(!scope.empty())? "./"+moduleDirectory+"/"+scope+"/"+moduleName : "./"+moduleDirectory+"/"+moduleName;
                 if(!std::filesystem::exists(localLinkPath)){
                     if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
                     SymanticVersioning symanticVersioning;
@@ -74,7 +66,7 @@ namespace sylvanmats::npm{
                         TGZDecompressor tgzDecompressor;
 //                                    tgzDecompressor(is, tmpPath);
                         tgzDecompressor(tmpPath, [&](std::filesystem::path& newPath, std::ostream& content){
-                            std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/cpp_modules/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/cpp_modules/"+moduleName+"-"+std::string(base);
+                            std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
                             if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
                             if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
                             localPath/=newPath;
@@ -91,20 +83,13 @@ namespace sylvanmats::npm{
                     });
                 }
                 else hitVersion=true;
+                if(hitVersion)recurseModules(localLinkPath);
             }
             if(url.syntax_ok() && !hitVersion){
                 std::string uri=(url.host().empty()) ? "git://github.com/"+url.path()+".git" : url.as_string();
-                std::string moduleName=std::string{key};
-                std::string scope="";
-                if(moduleName.length()>0 && moduleName.at(0)=='@'){
-                    unsigned int offset=moduleName.find('/');
-                    if(offset!=std::string::npos){
-                        scope=moduleName.substr(1, offset-1);
-                        moduleName=moduleName.substr(offset+1);
-                    }
-                }
-                std::filesystem::path localLinkPath=(!scope.empty()) ? "./cpp_modules/"+scope+"/"+moduleName : "./cpp_modules/"+moduleName;
-                std::filesystem::path localPath= (!scope.empty())? home+"/.cnpm/cpp_modules/"+scope+"/"+moduleName : home+"/.cnpm/cpp_modules/"+moduleName;
+                auto&& [scope, moduleName]=parseModuleName(key);
+                std::filesystem::path localLinkPath=(!scope.empty()) ? "./"+moduleDirectory+"/"+scope+"/"+moduleName : "./"+moduleDirectory+"/"+moduleName;
+                std::filesystem::path localPath= (!scope.empty())? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName : home+"/.cnpm/"+moduleDirectory+"/"+moduleName;
                 std::string oid="";
                 if(!std::filesystem::exists(localPath)){
                     git_libgit2_init();
@@ -198,22 +183,45 @@ namespace sylvanmats::npm{
                 if(!oid.empty())std::cout<<"oid "<<oid<<std::endl;
                 if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
                 if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
-                if(depth<2)
-                    for(auto& p: std::filesystem::directory_iterator(localLinkPath)){
-                        if(p.path().filename().compare("package.json")==0 && std::filesystem::exists(p.path())){
-                            std::cout<<depth<<" "<<p.path()<<std::endl;
-                            sylvanmats::io::json::JsonBinder jsonBinder;
-                            std::ifstream is(p.path());
-                            jsonBinder(is);
-                            depth++;
-                            this->operator()(jsonBinder);
-                            depth--;
-                            std::cout<<"depth "<<depth<<std::endl;
-                        }
-                    }
-                
+                recurseModules(localLinkPath);
             }
         
+    }
+
+    void Installation::recurseModules(std::filesystem::path localLinkPath){
+        if(localLinkPath.string().find("wait-on")!=std::string::npos)std::cout<<depth<<" "<<localLinkPath<<std::endl;
+        if(depth<2)
+            for(auto& p: std::filesystem::directory_iterator(localLinkPath)){
+                if(p.path().filename().compare("package.json")==0 && std::filesystem::exists(p.path())){
+                    //std::cout<<depth<<" "<<p.path()<<std::endl;
+                    sylvanmats::io::json::JsonBinder jsonBinder;
+                    std::ifstream is(p.path());
+                    jsonBinder(is);
+                    depth++;
+                    this->operator()(jsonBinder);
+                    linkAnyBinaries(jsonBinder, localLinkPath);
+                    depth--;
+                    //std::cout<<"depth "<<depth<<std::endl;
+                }
+            }
+    }
+    
+    void Installation::linkAnyBinaries(sylvanmats::io::json::JsonBinder& jb, std::filesystem::path& localLinkPath){
+        if(std::filesystem::exists(localLinkPath)){
+            std::filesystem::path binPath="./"+moduleDirectory;
+            binPath/=".bin";
+            if(!std::filesystem::exists(binPath))std::filesystem::create_directories(binPath);
+            sylvanmats::io::json::path jp="bin";
+            jb(jp, [&](std::string_view& key, std::any& v){
+                std::filesystem::path execLinkPath=binPath;
+                execLinkPath/=key;
+                std::filesystem::path execPath=localLinkPath;
+                execPath/=std::any_cast<std::string_view>(v);
+                std::filesystem::path relExecPath=localLinkPath.lexically_relative(binPath);
+                relExecPath/=std::any_cast<std::string_view>(v);
+                if(!std::filesystem::exists(execLinkPath) && std::filesystem::exists(execPath))std::filesystem::create_directory_symlink(relExecPath, execLinkPath);
+            });
+        }
     }
     
 }

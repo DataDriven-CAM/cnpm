@@ -48,6 +48,7 @@ int main(int argc, char** argv, char **envp) {
     
     CLI11_PARSE(app, argc, argv);
     
+    std::string moduleDirectory=(app.count("module-directory"))? app.get_option("module-directory")->as<std::string>(): "cpp_modules";
     for(auto& o : positional | std::views::filter([](std::string& s){return s.ends_with(".json");}))
         filename=o;
     
@@ -89,7 +90,7 @@ int main(int argc, char** argv, char **envp) {
     else if(link){
         std::filesystem::path localPath=packageName;
         std::string moduleName=localPath.filename().string();
-        std::filesystem::path localLinkPath="./cpp_modules/"+moduleName;
+        std::filesystem::path localLinkPath="./"+moduleDirectory+"/"+moduleName;
         if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath)){
             std::filesystem::create_directory_symlink(localPath, localLinkPath);
         }
@@ -104,10 +105,10 @@ int main(int argc, char** argv, char **envp) {
     
     if(install || update){
         sylvanmats::io::json::path jp="dependencies";
-        sylvanmats::npm::Installation installation(jp);
+        sylvanmats::npm::Installation installation(moduleDirectory, jp);
         installation(jsonBinder);
         sylvanmats::io::json::path jp2="devDependencies";
-        sylvanmats::npm::Installation installation2(jp2);
+        sylvanmats::npm::Installation installation2(moduleDirectory, jp2);
         installation2(jsonBinder);
         
     }
