@@ -193,8 +193,7 @@ namespace sylvanmats::npm{
     }
 
     void Installation::recurseModules(std::filesystem::path localLinkPath){
-        if(localLinkPath.string().find("wait-on")!=std::string::npos)std::cout<<depth<<" "<<localLinkPath<<std::endl;
-        if(depth<2)
+         if(depth<2)
             for(auto& p: std::filesystem::directory_iterator(localLinkPath)){
                 if(p.path().filename().compare("package.json")==0 && std::filesystem::exists(p.path())){
                     //std::cout<<depth<<" "<<p.path()<<std::endl;
