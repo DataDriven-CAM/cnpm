@@ -54,31 +54,35 @@ namespace sylvanmats::npm{
                     SymanticVersioning symanticVersioning;
                     symanticVersioning(val, [&](std::string_view base, std::string_view wildcard){
                         std::cout << val << " version " << base<< " "<< wildcard << '\n';
-                        sylvanmats::reading::WebGetter webGetter;
-                        std::string uri =(!scope.empty()) ? "https://registry.npmjs.org/@"+scope+"/"+moduleName+"/-/"+moduleName+"-"+std::string(wildcard)+".tgz" : "https://registry.npmjs.org/"+moduleName+"/-/"+moduleName+"-"+std::string(wildcard)+".tgz";
-                        std::cout<<"uri "<<uri<<std::endl;
-                        std::string fileName=moduleName+"-"+std::string(wildcard)+".tgz";
-                        std::filesystem::path tmpPath=std::filesystem::temp_directory_path()/fileName;
-//                        std::cout<<"t file "<<tmpPath<<std::endl;
-                        std::ofstream tgzFile(tmpPath.c_str(), std::ios::binary);
-                        webGetter(uri, tgzFile);
-                        tgzFile.close();
-                        TGZDecompressor tgzDecompressor;
-//                                    tgzDecompressor(is, tmpPath);
-                        tgzDecompressor(tmpPath, [&](std::filesystem::path& newPath, std::ostream& content){
-                            std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
-                            if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
-                            if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
-                            localPath/=newPath;
-//                            std::cout<<" "<<localPath.parent_path()<<" "<<localPath.filename()<<" "<<content.tellp()<<std::endl;
-                            if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
-                            if(!std::filesystem::exists(localPath)){
-                                std::ofstream innerFile(localPath.c_str(), std::ios::binary);
-                                std::istream is(dynamic_cast<std::stringbuf*>(content.rdbuf()));
-                                innerFile<<dynamic_cast<std::stringbuf*>(content.rdbuf())->str();
-                                innerFile.flush();
-                            }
-                        });
+                        std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
+                        if(std::filesystem::exists(localPath))
+                            std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                        else{
+                            sylvanmats::reading::WebGetter webGetter;
+                            std::string uri =(!scope.empty()) ? "https://registry.npmjs.org/@"+scope+"/"+moduleName+"/-/"+moduleName+"-"+std::string(wildcard)+".tgz" : "https://registry.npmjs.org/"+moduleName+"/-/"+moduleName+"-"+std::string(wildcard)+".tgz";
+                            std::cout<<"uri "<<uri<<std::endl;
+                            std::string fileName=moduleName+"-"+std::string(wildcard)+".tgz";
+                            std::filesystem::path tmpPath=std::filesystem::temp_directory_path()/fileName;
+    //                        std::cout<<"t file "<<tmpPath<<std::endl;
+                            std::ofstream tgzFile(tmpPath.c_str(), std::ios::binary);
+                            webGetter(uri, tgzFile);
+                            tgzFile.close();
+                            TGZDecompressor tgzDecompressor;
+    //                                    tgzDecompressor(is, tmpPath);
+                            tgzDecompressor(tmpPath, [&](std::filesystem::path& newPath, std::ostream& content){
+                                if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
+                                if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                                localPath/=newPath;
+    //                            std::cout<<" "<<localPath.parent_path()<<" "<<localPath.filename()<<" "<<content.tellp()<<std::endl;
+                                if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
+                                if(!std::filesystem::exists(localPath)){
+                                    std::ofstream innerFile(localPath.c_str(), std::ios::binary);
+                                    std::istream is(dynamic_cast<std::stringbuf*>(content.rdbuf()));
+                                    innerFile<<dynamic_cast<std::stringbuf*>(content.rdbuf())->str();
+                                    innerFile.flush();
+                                }
+                            });
+                        }
                         hitVersion=true;
                     });
                 }
