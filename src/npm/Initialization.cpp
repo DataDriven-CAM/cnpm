@@ -4,7 +4,7 @@
 
 namespace sylvanmats::npm{
     
-    Initialization::Initialization() : home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Initialization::Initialization() : home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     sylvanmats::io::json::JsonBinder Initialization::operator()(std::string packageName){

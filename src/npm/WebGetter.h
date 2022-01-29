@@ -16,7 +16,10 @@
 #include <thread>
 
 #ifdef __WIN32__
-# include <winsock2.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
+
 #else
 #include <sys/socket.h>
 #include <arpa/inet.h>

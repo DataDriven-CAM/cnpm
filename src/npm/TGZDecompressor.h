@@ -91,7 +91,7 @@ union tar_buffer
             if(std::filesystem::exists(filePath)){
                 if(filePath.extension().compare(".tgz")==0){
                     std::stringstream ss;
-                    gzFile file=gzopen(filePath.c_str(), "rb");
+                    gzFile file=this->open(filePath);
                     union  tar_buffer buffer;
                     int err;
                     int getheader = 1;
@@ -277,8 +277,7 @@ union tar_buffer
         };
 
     protected:
-        int octalToDecimal(int octalNumber)
-        {
+        int octalToDecimal(int octalNumber){
             int decimalNumber = 0, i = 0, rem;
             while (octalNumber != 0)
             {
@@ -290,8 +289,7 @@ union tar_buffer
             return decimalNumber;
         }
         
-        char *strtime (time_t *t)
-        {
+        char *strtime (time_t *t){
           struct tm   *local;
           static char result[32];
 
@@ -301,6 +299,19 @@ union tar_buffer
                   local->tm_hour, local->tm_min, local->tm_sec);
           return result;
         }
+
+        gzFile open(std::filesystem::path& filePath){
+            //if constexpr (std::is_same_v<std::filesystem::path::value_type, wchar_t>)
+#ifdef __WIN32__
+                return gzopen_w(filePath.c_str(), "rb");
+#else
+            //else if constexpr (std::is_same_v<std::filesystem::path::value_type, char>)
+                 return gzopen(filePath.c_str(), "rb");
+#endif
+            //else
+            //    static_assert(std::is_same_v<std::filesystem::path::value_type, wchar_t> || std::is_same_v<std::filesystem::path::value_type, char>, "Must be char or wchar_t!");
+        }
+
     };
 }
 

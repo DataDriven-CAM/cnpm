@@ -12,12 +12,11 @@
 
 #include "npm/SymanticVersioning.h"
 #include "npm/WebGetter.h"
-#include "npm/TGZDecompressor.h"
 
 
 namespace sylvanmats::npm{
     
-    Outdated::Outdated() : home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Outdated::Outdated() : home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Outdated::operator()(sylvanmats::io::json::JsonBinder& jb, sylvanmats::io::json::path type){

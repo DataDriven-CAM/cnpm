@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <ranges>
 #include <algorithm>
+#include <exception>
 
 #include "npm/SymanticVersioning.h"
 #include "npm/WebGetter.h"
@@ -16,7 +17,7 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation(std::string& moduleDirectory, sylvanmats::io::json::path type) : moduleDirectory (moduleDirectory), type (type), home (std::getenv("HOME")), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Installation::Installation(std::string& moduleDirectory, sylvanmats::io::json::path type) : moduleDirectory (moduleDirectory), type (type), home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Installation::operator()(std::string& packageName){
@@ -92,8 +93,8 @@ namespace sylvanmats::npm{
             if(url.syntax_ok() && !hitVersion){
                 std::string uri=(url.host().empty()) ? "git://github.com/"+url.path()+".git" : url.as_string();
                 auto&& [scope, moduleName]=parseModuleName(key);
-                std::filesystem::path localLinkPath=(!scope.empty()) ? "./"+moduleDirectory+"/"+scope+"/"+moduleName : "./"+moduleDirectory+"/"+moduleName;
-                std::filesystem::path localPath= (!scope.empty())? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName : home+"/.cnpm/"+moduleDirectory+"/"+moduleName;
+                std::filesystem::path localLinkPath=(!scope.empty()) ? std::filesystem::path(".")/moduleDirectory/scope/moduleName : std::filesystem::path(".")/moduleDirectory/moduleName;
+                std::filesystem::path localPath= (!scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/scope/moduleName : std::filesystem::path(home)/".cnpm"/moduleDirectory/moduleName;
                 std::string oid="";
                 if(!std::filesystem::exists(localPath)){
                     git_libgit2_init();
@@ -135,7 +136,8 @@ namespace sylvanmats::npm{
 //                                opts.fetch_opts.callbacks.transfer_progress=
 //                                opts.fetch_opts.callbacks.certificate_check
                     git_repository *gitRepository;
-                    int err=git_clone(&gitRepository, uri.c_str(), localPath.c_str(), &opts);
+                    std::string lpath={ std::begin(localPath.string()), std::end(localPath.string()) };
+                    int err= git_clone(&gitRepository, uri.c_str(), lpath.c_str(), &opts);
                     if(err!=0)
                         std::cout<<"err "<<err<<" "<<git_error_last()->klass<<" "<<git_error_last()->message<<std::endl;
                     else{
@@ -186,7 +188,14 @@ namespace sylvanmats::npm{
                 }
                 if(!oid.empty())std::cout<<"oid "<<oid<<std::endl;
                 if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
-                if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath)){
+                    try{
+                        std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                    }
+                    catch(std::filesystem::filesystem_error& ex){
+                        std::throw_with_nested( std::runtime_error("Couldn't create symbolic link " + localLinkPath.string()) );
+                    }
+                }
                 recurseModules(localLinkPath);
             }
         

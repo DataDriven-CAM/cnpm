@@ -16,6 +16,8 @@ namespace sylvanmats::npm{
         virtual ~Initialization() = default;
     public:
         sylvanmats::io::json::JsonBinder operator()(std::string packageName);
+    protected:
+
     };
 }
 

@@ -12,7 +12,6 @@
 #include <iterator>
 
 #include "npm/WebGetter.h"
-#include "npm/TGZDecompressor.h"
 
 namespace sylvanmats::npm{
     

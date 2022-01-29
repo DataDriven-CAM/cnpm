@@ -34,3 +34,4 @@
 build
 /cnpm
 cpp_modules
+.vscode
