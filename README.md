@@ -4,10 +4,14 @@ c++ package manager
 Managing projects with package.json and also dependencies that don't have a package.json.
 
 ## Start
-Need gcc 12.0.0 or later
+Need gcc 12.0.0 or later.  For windows  (Rev5, Built by MSYS2 project) 11.2.0
 
 ```
 bootstrap.sh
+```
+or on windows the powershell 7
+```
+bootstrap.ps1
 ```
 After initial build , this project can build itself though eventually I hope to distribute to
 linux and mac (maybe windows).
