@@ -10,6 +10,11 @@
 #include <algorithm>
 #include <exception>
 
+#ifdef __WIN32__
+#include "windows.h"
+#include "winbase.h"
+#endif
+
 #include "npm/SymanticVersioning.h"
 #include "npm/WebGetter.h"
 #include "npm/TGZDecompressor.h"
@@ -189,12 +194,16 @@ namespace sylvanmats::npm{
                 if(!oid.empty())std::cout<<"oid "<<oid<<std::endl;
                 if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
                 if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath)){
+#ifdef __WIN32__
+                    CreateSymbolicLinkW(localLinkPath.c_str(), localPath.c_str(), SYMBOLIC_LINK_FLAG_DIRECTORY|SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE);
+#else
                     try{
                         std::filesystem::create_directory_symlink(localPath, localLinkPath);
                     }
                     catch(std::filesystem::filesystem_error& ex){
                         std::throw_with_nested( std::runtime_error("Couldn't create symbolic link " + localLinkPath.string()) );
                     }
+#endif
                 }
                 recurseModules(localLinkPath);
             }

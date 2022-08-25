@@ -213,12 +213,16 @@ namespace sylvanmats::io::json{
                             hitColon=false;
                     it++;
                         break;
+                    case '\\':
+                    it++;
+                    it++;
+                        break;
                     case '"':
                     {
                     it++;
                         std::span<char>::iterator itStart=it;
                         int c=0;
-                        while((*it)!='"'){it++;c++;};
+                        while((*it)!='"'){if((*it)=='\\')it++;it++;c++;};
                         if(hitColon){
                             bool once=true;
                             for(unsigned int objIndex=objStart.size()-1;once && objIndex>=0;objIndex--){

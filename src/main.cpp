@@ -11,6 +11,7 @@
 #include <functional>
 #include <regex>
 #include <ranges>
+#include <execution>
 #include <algorithm>
 #include <iterator>
 
@@ -131,6 +132,7 @@ int main(int argc, char** argv, char **envp) {
             jsonBinder(jp, [](std::string_view& key, std::any& val){
                 if(key.compare("test")==0){
                     std::string command{std::any_cast<std::string_view>(val)};
+                    replace(command, "\\\"", "\"");
                     std::cout<<"\ttest : " << command << std::endl;
                     int status=system(command.c_str());
                     std::cout<<"\t"<<key << " : " << status << std::endl;
@@ -146,6 +148,8 @@ int main(int argc, char** argv, char **envp) {
                     std::cout<<"o "<<o<<" "<<key<<std::endl;
                     std::string command{std::any_cast<std::string_view>(val)};
                     std::cout<<"\t"<<o << " : " << command << std::endl;
+                    replace(command, "\\\"", "\"");
+//                    std::cout<< "command : " << command << std::endl;
                     int status=system(command.c_str());
                     std::cout<<"\t"<<o << " : " << status << std::endl;
                 }

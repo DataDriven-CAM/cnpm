@@ -9,7 +9,7 @@ main: build/src/npm/Installation.o build/src/npm/Addition.o build/src/npm/Remova
 
 build/src/main.o: build/src/npm/Installation.o build/src/npm/Addition.o build/src/npm/Removal.o build/src/npm/Outdated.o build/src/npm/WebGetter.o
 
-CXXFLAGS=-std=c++2b -DSYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE=2 -DNDEBUG -O3 -I./src -I./cpp_modules/json/include -I./cpp_modules/libgit2/dist/include -MMD
+CXXFLAGS=-std=c++2b -DSYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE=2 -DNDEBUG -O3 -I./src -I./cpp_modules/json/include -I./cpp_modules/libgit2/dist/include -Ic:\msys64\mingw64\x86_64-w64-mingw32\include -MMD
 build/src/npm/Installation.o: src/npm/Installation.cpp
 	$(CXX) $(CXXFLAGS) -c -o build/src/npm/Installation.o src/npm/Installation.cpp
 
