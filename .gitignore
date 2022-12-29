@@ -35,3 +35,4 @@ build
 /cnpm
 cpp_modules
 .vscode
+/nbproject/

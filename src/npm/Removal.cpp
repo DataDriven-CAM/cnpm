@@ -19,7 +19,7 @@ namespace sylvanmats::npm{
         sylvanmats::npm::unordered_map<std::string, std::string> holder;
     }
     
-    bool Removal::operator()(sylvanmats::io::json::JsonBinder& jb, sylvanmats::io::json::path type, std::string packageName){
+    bool Removal::operator()(sylvanmats::io::json::Binder& jb, sylvanmats::io::json::Path type, std::string packageName){
         url::Url url(packageName);
         std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
         bool hitVersion=false;

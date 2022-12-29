@@ -1,7 +1,7 @@
 #pragma once
 
-static std::string username="rimartin";
-static std::string passphrase="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";
+static std::string username{};
+static std::string passphrase{};
 
 #define UNUSED(x) (void)(x)
 
@@ -59,3 +59,13 @@ static void replace(std::string& s, std::string ov, std::string nv){
         s.resize(newLength);
     }
 };
+
+void print_exception(const std::exception& e, int level =  0)
+{
+    std::cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
+    try {
+        std::rethrow_if_nested(e);
+    } catch(const std::exception& e) {
+        print_exception(e, level+1);
+    } catch(...) {}
+}

@@ -20,20 +20,10 @@
 #include "npm/Addition.h"
 #include "npm/Removal.h"
 #include "npm/Outdated.h"
-#include "io/json/JsonBinder.h"
+#include "io/json/Binder.h"
 
 #include <typeinfo>
 #include <typeindex>
-
-void print_exception(const std::exception& e, int level =  0)
-{
-    std::cerr << std::string(level, ' ') << "exception: " << e.what() << '\n';
-    try {
-        std::rethrow_if_nested(e);
-    } catch(const std::exception& e) {
-        print_exception(e, level+1);
-    } catch(...) {}
-}
 
 int main(int argc, char** argv, char **envp) {
     try{
@@ -60,17 +50,23 @@ int main(int argc, char** argv, char **envp) {
         CLI::App &test = *app.add_subcommand("t,test", R"(Runs a package's "test" script, if one was provided)");
         app.set_config("--config", cnpmHome+"/config.toml", "Read a toml file");
         app.add_option("module-directory")->group("");
+        CLI::App &security = *app.add_subcommand("security", "Security properties in config file");
+        security.add_option("username", packageName, "git user name");
+        security.add_option("passphrase", packageName, "git pass phrase");
+        security.configurable();
 
         CLI11_PARSE(app, argc, argv);
 
         std::string moduleDirectory=(app.count("module-directory"))? app.get_option("module-directory")->as<std::string>(): "cpp_modules";
+        username=(app.got_subcommand("security") && security.count("username"))? security.get_option("username")->as<std::string>(): "anonymous";
+        passphrase=(app.got_subcommand("security") && security.count("passphrase"))? security.get_option("passphrase")->as<std::string>(): "";
         for(auto& o : positional | std::views::filter([](std::string& s){return s.ends_with(".json");}))
             filename=o;
 
         const auto [first, last] = std::ranges::remove_if(positional, [&filename](std::string& s){return s.compare(filename)==0;});
         positional.erase(first, last);
 
-        sylvanmats::io::json::JsonBinder jsonBinder;
+        sylvanmats::io::json::Binder jsonBinder;
         std::filesystem::path packagePath=filename;
         if(std::filesystem::exists(packagePath)){
             std::ifstream is(packagePath);
@@ -81,7 +77,8 @@ int main(int argc, char** argv, char **envp) {
         bool update=false;
         if(add){
             sylvanmats::npm::Addition addition;
-            sylvanmats::io::json::path jp=(dev) ? "devDependencies" :"dependencies";
+            sylvanmats::io::json::Path jp=Root();
+            (dev) ? jp["devDependencies"] : jp["dependencies"];
             if(addition(jsonBinder, jp, packageName)){
                 //filename="test-"+filename;
                 std::ofstream o(filename.c_str());
@@ -91,7 +88,7 @@ int main(int argc, char** argv, char **envp) {
         }
         else if(remove){
             sylvanmats::npm::Removal removal;
-            sylvanmats::io::json::path jp=(dev) ? "devDependencies" :"dependencies";
+            sylvanmats::io::json::Path jp=(dev) ? "devDependencies" :"dependencies";
             if(removal(jsonBinder, jp, packageName)){
                 //filename="test-"+filename;
                 std::ofstream o(filename.c_str());
@@ -112,23 +109,28 @@ int main(int argc, char** argv, char **envp) {
         }
         else if(outdated){
             sylvanmats::npm::Outdated outdated;
-            sylvanmats::io::json::path jp="dependencies";
+            sylvanmats::io::json::Path jp;
+            jp["dependencies"];
             outdated(jsonBinder, jp);
-            sylvanmats::io::json::path jp2="devDependencies";
+            sylvanmats::io::json::Path jp2;
+            jp2["devDependencies"];
             outdated(jsonBinder, jp2);
         }
 
         if(install || update){
-            sylvanmats::io::json::path jp="dependencies";
+            sylvanmats::io::json::Path jp;
+            jp["dependencies"];
             sylvanmats::npm::Installation installation(moduleDirectory, jp);
             installation(jsonBinder);
-            sylvanmats::io::json::path jp2="devDependencies";
+            sylvanmats::io::json::Path jp2;
+            jp2["devDependencies"];
             sylvanmats::npm::Installation installation2(moduleDirectory, jp2);
             installation2(jsonBinder);
 
         }
         if(test){
-            sylvanmats::io::json::path jp="scripts";
+            sylvanmats::io::json::Path jp;
+            jp["scripts"];
             jsonBinder(jp, [](std::string_view& key, std::any& val){
                 if(key.compare("test")==0){
                     std::string command{std::any_cast<std::string_view>(val)};
@@ -142,7 +144,8 @@ int main(int argc, char** argv, char **envp) {
         }
         for(auto& o : positional){
             std::cout<<"pos scriptKeys: "<<o<<std::endl;
-            sylvanmats::io::json::path jp="scripts";
+            sylvanmats::io::json::Path jp;
+            jp["scripts"];
             jsonBinder(jp, [&o](std::string_view& key, std::any& val){
                 if(o.compare(key)==0){
                     std::cout<<"o "<<o<<" "<<key<<std::endl;

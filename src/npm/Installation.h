@@ -4,7 +4,7 @@
 #include <tuple>
 #include <filesystem>
 
-#include "io/json/JsonBinder.h"
+#include "io/json/Binder.h"
 
 #include "git2.h"
 
@@ -20,21 +20,21 @@ namespace sylvanmats::npm{
     class Installation{
     protected:
         std::string moduleDirectory;
-        sylvanmats::io::json::path type;
+        sylvanmats::io::json::Path type;
         std::string home;
         std::string cnpmHome;
         unsigned int depth=0;
     public:
-        Installation(std::string& moduleDirectory, sylvanmats::io::json::path type);
+        Installation(std::string& moduleDirectory, sylvanmats::io::json::Path type);
         Installation(const Installation& orig) =  delete;
         virtual ~Installation() = default;
     public:
         void operator()(std::string& packageName);
-        void operator()(sylvanmats::io::json::JsonBinder& jb);
+        void operator()(sylvanmats::io::json::Binder& jb);
     protected:
         void install(std::string_view& key, std::string_view& val);
         void recurseModules(std::filesystem::path localLinkPath);
-        void linkAnyBinaries(sylvanmats::io::json::JsonBinder& jb, std::filesystem::path& localLinkPath);
+        void linkAnyBinaries(sylvanmats::io::json::Binder& jb, std::filesystem::path& localLinkPath);
         inline std::tuple<std::string, std::string> parseModuleName(std::string_view& key){
             std::string moduleName=std::string{key};
             std::string scope="";

@@ -19,14 +19,16 @@ namespace sylvanmats::npm{
     Outdated::Outdated() : home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
-    void Outdated::operator()(sylvanmats::io::json::JsonBinder& jb, sylvanmats::io::json::path type){
-        sylvanmats::io::json::path jpName="name";
+    void Outdated::operator()(sylvanmats::io::json::Binder& jb, sylvanmats::io::json::Path type){
+        sylvanmats::io::json::Path jpName;
+        jpName["name"];
         std::string_view currentPackageName;
         jb(jpName, [&currentPackageName](std::any& v){
             currentPackageName=std::any_cast<std::string_view>(v);
         });
+        std::cout<<" currentPackageName "<<currentPackageName<<std::endl;
         jb(type, [&](std::string_view& key, std::any& v){
-//            std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
+            std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
             std::string_view val{std::any_cast<std::string_view>(v)};
             url::Url url(std::string{val});
 //            std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
@@ -42,9 +44,10 @@ namespace sylvanmats::npm{
                     std::filesystem::path tmpPath=std::filesystem::temp_directory_path()/fileName;
 //                    std::cout<<"t file "<<tmpPath<<std::endl;
                     webGetter(uri, [&moduleName, &base, &currentPackageName](std::istream& is){
-                        sylvanmats::io::json::JsonBinder jsonBinder;
+                        sylvanmats::io::json::Binder jsonBinder;
                         jsonBinder(is);
-                        sylvanmats::io::json::path jp="version";
+                        sylvanmats::io::json::Path jp;
+                        jp["version"];
                         jsonBinder(jp, [&](std::any& v){
                           std::cout<<moduleName<<" "<<base<<" "<<std::any_cast<std::string_view>(v)<<" "<<currentPackageName<<std::endl;  
                         });

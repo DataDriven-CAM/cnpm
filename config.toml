@@ -1,2 +1,6 @@
 module-directory = "cpp_modules"
 
+[security]
+username = ""
+passphrase = ""
+

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "io/json/JsonBinder.h"
+#include "io/json/Binder.h"
 
 #include "git2.h"
 
@@ -17,7 +17,7 @@ namespace sylvanmats::npm{
         Outdated(const Outdated& orig) =  delete;
         virtual ~Outdated() = default;
     public:
-        void operator()(sylvanmats::io::json::JsonBinder& jb, sylvanmats::io::json::path type);
+        void operator()(sylvanmats::io::json::Binder& jb, sylvanmats::io::json::Path type);
     };
 }
 

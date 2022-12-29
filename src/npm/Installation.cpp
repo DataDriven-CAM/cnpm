@@ -22,7 +22,7 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation(std::string& moduleDirectory, sylvanmats::io::json::path type) : moduleDirectory (moduleDirectory), type (type), home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Installation::Installation(std::string& moduleDirectory, sylvanmats::io::json::Path type) : moduleDirectory (moduleDirectory), type (type), home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Installation::operator()(std::string& packageName){
@@ -39,7 +39,7 @@ namespace sylvanmats::npm{
         }
     }
     
-    void Installation::operator()(sylvanmats::io::json::JsonBinder& jb){
+    void Installation::operator()(sylvanmats::io::json::Binder& jb){
         jb(type, [&](std::string_view& key, std::any& v){
 //            if(key.compare("axios")==0)std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
             std::string_view val{std::any_cast<std::string_view>(v)};
@@ -215,7 +215,7 @@ namespace sylvanmats::npm{
             for(auto& p: std::filesystem::directory_iterator(localLinkPath)){
                 if(p.path().filename().compare("package.json")==0 && std::filesystem::exists(p.path())){
                     //std::cout<<depth<<" "<<p.path()<<std::endl;
-                    sylvanmats::io::json::JsonBinder jsonBinder;
+                    sylvanmats::io::json::Binder jsonBinder;
                     std::ifstream is(p.path());
                     jsonBinder(is);
                     depth++;
@@ -227,12 +227,13 @@ namespace sylvanmats::npm{
             }
     }
     
-    void Installation::linkAnyBinaries(sylvanmats::io::json::JsonBinder& jb, std::filesystem::path& localLinkPath){
+    void Installation::linkAnyBinaries(sylvanmats::io::json::Binder& jb, std::filesystem::path& localLinkPath){
         if(std::filesystem::exists(localLinkPath)){
             std::filesystem::path binPath="./"+moduleDirectory;
             binPath/=".bin";
             if(!std::filesystem::exists(binPath))std::filesystem::create_directories(binPath);
-            sylvanmats::io::json::path jp="bin";
+            sylvanmats::io::json::Path jp;
+            jp["bin"];
             jb(jp, [&](std::string_view& key, std::any& v){
                 std::filesystem::path execLinkPath=binPath;
                 execLinkPath/=key;

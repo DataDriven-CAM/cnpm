@@ -13,8 +13,14 @@ git clone https://github.com/madler/zlib.git  $Env:UserProfile/.cnpm/cpp_modules
 New-Item -Path cpp_modules/zlib -ItemType SymbolicLink -Target $Env:UserProfile/.cnpm/cpp_modules/zlib
 git clone https://github.com/goblinhack/c-plus-plus-serializer.git  $Env:UserProfile/.cnpm/cpp_modules/c-plus-plus-serializer
 New-Item -Path cpp_modules/c-plus-plus-serializer -ItemType SymbolicLink -Target $Env:UserProfile/.cnpm/cpp_modules/c-plus-plus-serializer
+git clone https://github.com/DataDriven-CAM/json-thresher.git  $Env:UserProfile/.cnpm/cpp_modules/json-thresher
+New-Item -Path cpp_modules/json-thresher -ItemType SymbolicLink -Target $Env:UserProfile/.cnpm/cpp_modules/json-thresher
+git clone https://github.com/goblinhack/c-plus-plus-serializer.git  $Env:UserProfile/.cnpm/cpp_modules/c-plus-plus-serializer
+New-Item -Path cpp_modules/antlr4 -ItemType SymbolicLink -Target $Env:UserProfile/.cnpm/cpp_modules/antlr4
 
-cmake -G
+#cmake -G
+mkdir -ea 0 cpp_modules/json-thresher/build
+cd cpp_modules/json-thresher/ && pwd && mingw32-make.exe -j 3 -f Makefile all  && pwd && cd ../..
 mkdir -ea 0 cpp_modules/zlib/build
 cd cpp_modules/zlib/build && cmake -G "Unix Makefiles" "-DCMAKE_BUILD_TYPE=Release" "-DCMAKE_INSTALL_PREFIX=$(pwd)/dist" .. && make install && cd ../../..
 cd cpp_modules/openssl && sh ./config -v shared "--prefix=$(pwd)/openssl" "--openssldir=$(pwd)/openssl/openssl" && make && make install && cd ../..
@@ -22,7 +28,6 @@ cd cpp_modules/urlcpp && pwd && make -f Makefile all && cd ../..
 mkdir -ea 0 cpp_modules/libgit2/build
 cd cpp_modules/libgit2/build && $installdir && cmake -G "Unix Makefiles" "-DCMAKE_INSTALL_PREFIX=$(pwd)/../dist" "-DCMAKE_C_COMPILER=gcc" "-DCMAKE_BUILD_TYPE=Release" "-DOPENSSL_CRYPTO_LIBRARY=$(pwd)/../../openssl/libcrypto-1_1-x64.dll" "-DOPENSSL_INCLUDE_DIR=$(pwd)/../../openssl/include"  "-DOPENSSL_SSL_LIBRARY=$(pwd)/../../openssl/libssl-1_1-x64.dll"  .. && cmake --build . && make install && cd ../../..
 
-mkdir -ea 0 build/src/npm
 g++ --version
 make -j3 
 

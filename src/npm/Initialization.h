@@ -4,7 +4,7 @@
 #include <map>
 #include <unordered_map>
 
-#include "io/json/JsonBinder.h"
+#include "io/json/Binder.h"
 
 namespace sylvanmats::npm{
 
@@ -15,7 +15,7 @@ namespace sylvanmats::npm{
         Initialization(const Initialization& orig) =  delete;
         virtual ~Initialization() = default;
     public:
-        sylvanmats::io::json::JsonBinder operator()(std::string packageName);
+        sylvanmats::io::json::Binder operator()(std::string packageName);
     protected:
 
     };

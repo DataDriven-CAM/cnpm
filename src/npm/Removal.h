@@ -6,7 +6,7 @@
 
 #include "unordered_map.h"
 
-#include "io/json/JsonBinder.h"
+#include "io/json/Binder.h"
 
 #include "git2.h"
 
@@ -19,7 +19,7 @@ namespace sylvanmats::npm{
         Removal(const Removal& orig) =  delete;
         virtual ~Removal() = default;
     public:
-        bool operator()(sylvanmats::io::json::JsonBinder& jb, sylvanmats::io::json::path type, std::string packageName);
+        bool operator()(sylvanmats::io::json::Binder& jb, sylvanmats::io::json::Path type, std::string packageName);
     };
 }
 

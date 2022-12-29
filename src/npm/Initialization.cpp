@@ -7,8 +7,8 @@ namespace sylvanmats::npm{
     Initialization::Initialization() : home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
-    sylvanmats::io::json::JsonBinder Initialization::operator()(std::string packageName){
-        sylvanmats::io::json::JsonBinder jsonBinder;
+    sylvanmats::io::json::Binder Initialization::operator()(std::string packageName){
+        sylvanmats::io::json::Binder jsonBinder;
         std::filesystem::path currentPath=std::filesystem::current_path();
         std::cout<<"name? ("<<currentPath.filename()<<"): ";
         std::string name;
