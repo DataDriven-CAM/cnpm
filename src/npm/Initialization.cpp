@@ -1,14 +1,17 @@
-#include "npm/Installation.h"
+#include <filesystem>
+
+#include "npm/Initialization.h"
 
 #include <format>
+#include <utility>
 
 namespace sylvanmats::npm{
     
     Initialization::Initialization() : home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
     }
     
-    sylvanmats::io::json::Binder Initialization::operator()(std::string packageName){
-        sylvanmats::io::json::Binder jsonBinder;
+    void Initialization::operator()(std::string packageName, sylvanmats::io::json::Binder& jsonBinder){
+//        sylvanmats::io::json::Binder jsonBinder;
         std::filesystem::path currentPath=std::filesystem::current_path();
         std::cout<<"name? ("<<currentPath.filename()<<"): ";
         std::string name;
@@ -35,7 +38,7 @@ namespace sylvanmats::npm{
         std::string Private;
         std::getline(std::cin, Private);
         if(!Private.empty())Private="null";
-        std::string package=std::format(R"({
+        std::string package=std::format(R"({{
   "name": "{}",
   "version": "{}",
   "description": "{}",
@@ -44,8 +47,8 @@ namespace sylvanmats::npm{
   "author": "{}",
   "license": "{}",
   "private": null
-})", name, version, description, repository, author, license, Private);
+}})", name, version, description, repository, author, license);
         std::cout<<package<<std::endl;
-        return jsonBinder;
+        jsonBinder(package);
     }
 }

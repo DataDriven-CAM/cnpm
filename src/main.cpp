@@ -16,6 +16,7 @@
 #include <iterator>
 
 #include "cnpm.h"
+#include "npm/Initialization.h"
 #include "npm/Installation.h"
 #include "npm/Addition.h"
 #include "npm/Removal.h"
@@ -68,7 +69,11 @@ int main(int argc, char** argv, char **envp) {
 
         sylvanmats::io::json::Binder jsonBinder;
         std::filesystem::path packagePath=filename;
-        if(std::filesystem::exists(packagePath)){
+        if(init && !std::filesystem::exists(packagePath)){
+            sylvanmats::npm::Initialization initialization;
+            initialization(packageName, jsonBinder);
+        }
+        else if(std::filesystem::exists(packagePath)){
             std::ifstream is(packagePath);
             std::string jsonContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
             jsonBinder(jsonContent);
@@ -95,9 +100,6 @@ int main(int argc, char** argv, char **envp) {
                 o << std::setw(4) << jsonBinder;
                 update=true;
             }
-        }
-        else if(init){//waiting for <format>
-            std::cout<<"Waiting for <format> in c++ compiler "<<std::endl;
         }
         else if(link){
             std::filesystem::path localPath=packageName;
