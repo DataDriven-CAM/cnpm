@@ -15,7 +15,7 @@
   "dependencies": {
     "urlcpp": "rimmartin/urlcpp",
     "CLI11": "CLIUtils/CLI11",
-    "openssl" : "openssl/openssl#OpenSSL_1_1_1l",
+    "openssl" : "openssl/openssl#OpenSSL_1_1_1w",
     "libgit2" : "libgit2/libgit2",
     "zlib" : "madler/zlib",
     "c-plus-plus-serializer" : "goblinhack/c-plus-plus-serializer",

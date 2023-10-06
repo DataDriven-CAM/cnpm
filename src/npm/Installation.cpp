@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstdlib>
 #include <fcntl.h>
 #include <filesystem>
 #include <ranges>
@@ -49,6 +50,38 @@ namespace sylvanmats::npm{
     
     void Installation::install(std::string_view& key, std::string_view& val){
             if(depth>=2)return;
+            if(val.starts_with("hg+")){
+                if(val.starts_with("hg+https")){
+                auto&& [scope, moduleName]=parseModuleName(key);
+                std::filesystem::path localLinkPath=(!scope.empty()) ? std::filesystem::path(".")/moduleDirectory/scope/moduleName : std::filesystem::path(".")/moduleDirectory/moduleName;
+                std::filesystem::path localPath= (!scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/scope/moduleName : std::filesystem::path(home)/".cnpm"/moduleDirectory/moduleName;
+                std::string oid="";
+                if(!std::filesystem::exists(localPath)){
+                    std::string valStr{val};
+                    std::string command="hg clone "+valStr.substr(3)+" "+localPath.string();
+                    
+                    if(std::system(command.c_str())==0){
+                        if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
+                        if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath)){
+#ifdef __WIN32__
+                            CreateSymbolicLinkW(localLinkPath.c_str(), localPath.c_str(), SYMBOLIC_LINK_FLAG_DIRECTORY|SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE);
+#else
+                            try{
+                                std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                            }
+                            catch(std::filesystem::filesystem_error& ex){
+                                std::throw_with_nested( std::runtime_error("Couldn't create symbolic link " + localLinkPath.string()) );
+                            }
+#endif
+                        }
+                        recurseModules(localLinkPath);
+                    }
+                }
+                    return;
+                }
+                std::cout<<val<<" hg repo not quite yet supported"<<std::endl;
+                return;
+            }
             url::Url url(std::string{val});
 //            std::cout<<val<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
             bool hitVersion=false;

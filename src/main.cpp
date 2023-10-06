@@ -72,6 +72,8 @@ int main(int argc, char** argv, char **envp) {
         if(init && !std::filesystem::exists(packagePath)){
             sylvanmats::npm::Initialization initialization;
             initialization(packageName, jsonBinder);
+            std::ofstream o(filename.c_str());
+            o << std::setw(4) << jsonBinder;
         }
         else if(std::filesystem::exists(packagePath)){
             std::ifstream is(packagePath);
