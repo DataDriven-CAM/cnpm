@@ -16,7 +16,7 @@
 
 namespace sylvanmats::npm{
     
-    Outdated::Outdated() : home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Outdated::Outdated() : home ((std::getenv("HOME")!=nullptr) ? std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Outdated::operator()(sylvanmats::io::json::Binder& jb, sylvanmats::io::json::Path type){
@@ -28,7 +28,7 @@ namespace sylvanmats::npm{
         });
         std::cout<<" currentPackageName "<<currentPackageName<<std::endl;
         jb(type, [&](std::string_view& key, std::any& v){
-            std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
+            std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<std::endl;//<<" "<<v.type().name()
             std::string_view val{std::any_cast<std::string_view>(v)};
             url::Url url(std::string{val});
 //            std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;

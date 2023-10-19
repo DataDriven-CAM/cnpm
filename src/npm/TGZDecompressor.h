@@ -185,23 +185,23 @@ union tar_buffer
                                             dynBuff=std::stringbuf();
                                             os.rdbuf(&dynBuff);
 //                                        outfile = fopen(fname,"wb");
-//                                        if (outfile == NULL) {
+//                                        if (outfile == nullptr) {
 //                                          /* try creating directory */
 //                                          char *p = strrchr(fname, '/');
-//                                          if (p != NULL) {
+//                                          if (p != nullptr) {
 //                                            *p = '\0';
 //                                            makedir(fname);
 //                                            *p = '/';
 //                                            outfile = fopen(fname,"wb");
 //                                          }
 //                                        }
-//                                        if (outfile != NULL)
+//                                        if (outfile != nullptr)
 //                                          printf("Extracting %s\n",fname);
 //                                        else
 //                                          fprintf(stderr, "%s: Couldn't create %s",prog,fname);
                                       }
 //                                    else
-//                                      outfile = NULL;
+//                                      outfile = nullptr;
                                   }
                                 getheader = 0;
                                 break;
@@ -249,7 +249,7 @@ union tar_buffer
                                 dynBuff=std::stringbuf();
                                 os.rdbuf(&dynBuff);
 //                                fclose(outfile);
-//                                outfile = NULL;
+//                                outfile = nullptr;
 //                                if (action != TGZ_INVALID)
 //                                  push_attr(&attributes,fname,tarmode,tartime);
                               }

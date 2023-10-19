@@ -20,5 +20,8 @@
     "zlib" : "madler/zlib",
     "c-plus-plus-serializer" : "goblinhack/c-plus-plus-serializer",
     "json-thresher": "DataDriven-CAM/json-thresher"
-  }
+  },
+    "devDependencies": {
+        "doctest": "onqtam/doctest"
+    }
 }

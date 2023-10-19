@@ -23,7 +23,7 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation(std::string& moduleDirectory, sylvanmats::io::json::Path type) : moduleDirectory (moduleDirectory), type (type), home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Installation::Installation(std::string& moduleDirectory, sylvanmats::io::json::Path type) : moduleDirectory (moduleDirectory), type (type), home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Installation::operator()(std::string& packageName){
@@ -136,7 +136,7 @@ namespace sylvanmats::npm{
                 std::string oid="";
                 if(!std::filesystem::exists(localPath)){
                     git_libgit2_init();
-                    //git_libgit2_opts(GIT_OPT_SET_SSL_CERT_LOCATIONS, NULL, cnpmHome.c_str());
+                    //git_libgit2_opts(GIT_OPT_SET_SSL_CERT_LOCATIONS, nullptr, cnpmHome.c_str());
                     git_clone_options opts=GIT_CLONE_OPTIONS_INIT;
 //                                int err=git_clone_options_init(&opts, GIT_CLONE_OPTIONS_VERSION);
                     cb_payload cbPayload;
@@ -179,13 +179,13 @@ namespace sylvanmats::npm{
                     if(err!=0)
                         std::cout<<"err "<<err<<" "<<git_error_last()->klass<<" "<<git_error_last()->message<<std::endl;
                     else{
-                        const char *branch = NULL;
-                        git_reference *head = NULL;
+                        const char *branch = nullptr;
+                        git_reference *head = nullptr;
 
                         err = git_repository_head(&head, gitRepository);
 
                         if (err == GIT_EUNBORNBRANCH || err == GIT_ENOTFOUND)
-                          branch = NULL;
+                          branch = nullptr;
                         else if (!err) {
                           branch = git_reference_shorthand(head);
                         }
@@ -194,14 +194,14 @@ namespace sylvanmats::npm{
 
                         git_reference_free(head);
                         
-                        git_remote *remote = NULL;
+                        git_remote *remote = nullptr;
                         err = git_remote_lookup(&remote, gitRepository, uri.c_str());
                         if (err < 0)
                             err = git_remote_create_anonymous(&remote, gitRepository, uri.c_str());
                             if (err >= 0) {
                                 const git_remote_head **refs;
                                 git_remote_callbacks callbacks = GIT_REMOTE_CALLBACKS_INIT;
-                                err = git_remote_connect(remote, GIT_DIRECTION_FETCH, &callbacks, NULL, NULL);
+                                err = git_remote_connect(remote, GIT_DIRECTION_FETCH, &callbacks, nullptr, nullptr);
                                 if (err >= 0){
                                     size_t refs_len;
                                     if (git_remote_ls(&refs, &refs_len, remote) >= 0){

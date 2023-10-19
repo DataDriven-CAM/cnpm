@@ -7,7 +7,7 @@
 
 namespace sylvanmats::npm{
     
-    Initialization::Initialization() : home ((std::getenv("HOME")!=NULL) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".") {
+    Initialization::Initialization() : home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Initialization::operator()(std::string packageName, sylvanmats::io::json::Binder& jsonBinder){
@@ -24,12 +24,13 @@ namespace sylvanmats::npm{
         std::cout<<"description?: ";
         std::string description;
         std::getline(std::cin, description);
-        std::cout<<"repository url?:";
-        std::string repository;
-        std::getline(std::cin, repository);
         std::cout<<"author?:";
         std::string author;
         std::getline(std::cin, author);
+        std::cout<<"repository url? ("<<author<<"/"<<name<<".git)";
+        std::string repository;
+        std::getline(std::cin, repository);
+        if(repository.empty())repository=author+"/"+name+".git";
         std::cout<<"license? (MIT): ";
         std::string license;
         std::getline(std::cin, license);
@@ -48,7 +49,7 @@ namespace sylvanmats::npm{
   "license": "{}",
   "private": null
 }})", name, version, description, repository, author, license);
-        std::cout<<package<<std::endl;
+        //std::cout<<package<<std::endl;
         jsonBinder(package);
     }
 }

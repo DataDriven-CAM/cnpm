@@ -36,3 +36,4 @@ build
 cpp_modules
 .vscode
 /nbproject/
+/test/myproject/

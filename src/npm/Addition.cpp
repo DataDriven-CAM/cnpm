@@ -26,6 +26,11 @@ namespace sylvanmats::npm{
         if(url.syntax_ok() && !hitVersion){
             unsigned int index=url.path().rfind('/');
             if(index!=std::string::npos){
+                bool tagExists=false;
+                jb(type, [&tagExists](std::any& v){tagExists=true;});
+                if(!tagExists){
+                    std::cout<<"not "<<type<<std::endl;
+                }
                 return jb(type, packageName.substr(index+1, packageName.length()-index), packageName);
             }
         }

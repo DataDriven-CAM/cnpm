@@ -37,9 +37,9 @@ namespace sylvanmats::reading{
         struct sockaddr_in6 *sockaddr_ipv6;
     char host[256];
     int sd = -1;
-    for (ptr = infoptr; ptr != NULL; ptr = ptr->ai_next) {
+    for (ptr = infoptr; ptr != nullptr; ptr = ptr->ai_next) {
 
-        getnameinfo(ptr->ai_addr, ptr->ai_addrlen, host, sizeof (host), NULL, 0, NI_NUMERICHOST);
+        getnameinfo(ptr->ai_addr, ptr->ai_addrlen, host, sizeof (host), nullptr, 0, NI_NUMERICHOST);
         //puts(host);
     //std::cout<<"host: "<<host<<" "<<(ptr->ai_family==AF_INET)<<std::endl;
         sd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
@@ -69,7 +69,7 @@ namespace sylvanmats::reading{
             // The buffer length is changed by each call to WSAAddresstoString
             // So we need to set it for each iteration through the loop for safety
             //ipbufferlength = 46;
-            /*iRetval = WSAAddressToString(sockaddr_ip, (DWORD) ptr->ai_addrlen, NULL, 
+            /*iRetval = WSAAddressToString(sockaddr_ip, (DWORD) ptr->ai_addrlen, nullptr, 
                 ipstringbuffer, &ipbufferlength );
             if (iRetval)
                 printf("WSAAddressToString failed with %u\n", WSAGetLastError() );

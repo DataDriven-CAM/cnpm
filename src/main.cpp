@@ -19,6 +19,7 @@
 #include "npm/Initialization.h"
 #include "npm/Installation.h"
 #include "npm/Addition.h"
+#include "npm/Remodeler.h"
 #include "npm/Removal.h"
 #include "npm/Outdated.h"
 #include "io/json/Binder.h"
@@ -28,32 +29,39 @@
 
 int main(int argc, char** argv, char **envp) {
     try{
-        std::string home=(std::getenv("HOME")!=NULL) ? std::getenv("HOME") : "c:/Users/Roger";
-        std::string cnpmHome=(std::getenv("CNPM_HOME")!=NULL) ?std::getenv("CNPM_HOME") : ".";
+        std::string home=(std::getenv("HOME")!=nullptr) ? std::getenv("HOME") : "c:/Users/Roger";
+        std::string cnpmHome=(std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".";
         CLI::App app{"C++ dependency manager"};
 
         std::string filename = "package.json";
         std::vector<std::string> positional;
         std::string packageName;
         app.add_option("-f,--file,custom", positional, "input package");
-        CLI::App &install = *app.add_subcommand("install", "Install all dependencies for a project");
+        app.require_subcommand(0,1);
+        bool dev{false};
+        bool global{false};
+        CLI::App &install = *app.add_subcommand("install", "Install all dependencies for a project")->alias("i");
         CLI::App &init = *app.add_subcommand("init", "Initializes project");
         CLI::App &add = *app.add_subcommand("add", "Installs a package and any packages that it depends on. By default, any new package is installed as a prod dependency");
         add.add_option("name", packageName, "package name");
-        CLI::App &link = *app.add_subcommand("link", "Connect the local project to another one");
+        add.add_flag("-D,--save-dev", dev, "Save package to your 'devDependencies'");
+        CLI::App &link = *app.add_subcommand("link", "Connect the local project to another one")->alias("ln");
         link.add_option("name", packageName, "package name or directory");
         CLI::App &outdated = *app.add_subcommand("outdated", "Check for outdated packages");
-        CLI::App &remove = *app.add_subcommand("remove", "Removes packages from node_modules and from the project's package.json");
+        CLI::App &rebuild = *app.add_subcommand("rebuild", "Rebuild a package");
+        rebuild.add_option("name", packageName, "package name");
+        CLI::App &remove = *app.add_subcommand("remove", "Removes packages from cpp_modules and from the project's package.json")->alias("rm");
         remove.add_option("name", packageName, "package name");
-        bool dev{false};
-        add.add_flag("-D,--save-dev", dev, "Save package to your 'devDependencies'");
         remove.add_flag("-D,--save-dev", dev, "Save package to your 'devDependencies'");
-        CLI::App &test = *app.add_subcommand("t,test", R"(Runs a package's "test" script, if one was provided)");
+        CLI::App &prefix = *app.add_subcommand("prefix", "Display prefix");
+        prefix.add_flag("-g,--global", global, "Display global prefix'");
+        CLI::App &test = *app.add_subcommand("test", R"(Runs a package's "test" script, if one was provided)")->alias("t");
+        CLI::App &install_test = *app.add_subcommand("install-test", R"(Runs a cnpm install followed immediately by a cnpm test)")->alias("it");
         app.set_config("--config", cnpmHome+"/config.toml", "Read a toml file");
         app.add_option("module-directory")->group("");
         CLI::App &security = *app.add_subcommand("security", "Security properties in config file");
-        security.add_option("username", packageName, "git user name");
-        security.add_option("passphrase", packageName, "git pass phrase");
+        security.add_option("username", username, "git user name");
+        security.add_option("passphrase", passphrase, "git pass phrase");
         security.configurable();
 
         CLI11_PARSE(app, argc, argv);
@@ -74,6 +82,7 @@ int main(int argc, char** argv, char **envp) {
             initialization(packageName, jsonBinder);
             std::ofstream o(filename.c_str());
             o << std::setw(4) << jsonBinder;
+            o.close();
         }
         else if(std::filesystem::exists(packagePath)){
             std::ifstream is(packagePath);
@@ -91,6 +100,16 @@ int main(int argc, char** argv, char **envp) {
                 std::ofstream o(filename.c_str());
                 o << std::setw(4) << jsonBinder;
                 update=true;
+            }
+        }
+        else if(rebuild){
+            sylvanmats::npm::Remodeler remodeler;
+            sylvanmats::io::json::Path jp=(dev) ? "devDependencies" :"dependencies";
+            if(remodeler(jsonBinder, jp, packageName)){
+                //filename="test-"+filename;
+                std::ofstream o(filename.c_str());
+                o << std::setw(4) << jsonBinder;
+                //update=true;
             }
         }
         else if(remove){
@@ -120,8 +139,43 @@ int main(int argc, char** argv, char **envp) {
             jp2["devDependencies"];
             outdated(jsonBinder, jp2);
         }
+        else if(prefix && global){
+#if __linux__
+            std::filesystem::path selfPath="/proc/self/exe";
+            std::filesystem::path appDirectory=std::filesystem::read_symlink(selfPath);
+            if(appDirectory.has_parent_path())appDirectory=appDirectory.parent_path();
+            std::cout<<" "<<appDirectory<<std::endl;
+#endif
+        }
+        else if(prefix){
+            std::filesystem::path currentDirectory=std::filesystem::current_path();
+            currentDirectory=std::filesystem::canonical(currentDirectory);
+            bool found=false;
+            while(!found && currentDirectory.has_parent_path()){
+            
+            std::filesystem::path packagePath=currentDirectory/filename;
+            std::filesystem::path modulePath=currentDirectory/moduleDirectory;
+            if(std::filesystem::exists(packagePath) || std::filesystem::exists(modulePath)){
+                if(std::filesystem::exists(packagePath)){
+                    packagePath=std::filesystem::canonical(packagePath);
+                    if(packagePath.has_parent_path()){
+                        std::cout<<packagePath.parent_path().string()<<std::endl;
+                        found=true;
+                    }
+                }
+                else if(std::filesystem::exists(modulePath)){
+                    modulePath=std::filesystem::canonical(modulePath);
+                    if(modulePath.has_parent_path()){
+                        std::cout<<modulePath.parent_path().string()<<std::endl;
+                        found=true;
+                    }
+                }
+            }
+            if(!found)currentDirectory=currentDirectory.parent_path();
+            }
+        }
 
-        if(install || update){
+        if(install || install_test || update){
             sylvanmats::io::json::Path jp;
             jp["dependencies"];
             sylvanmats::npm::Installation installation(moduleDirectory, jp);
@@ -132,7 +186,7 @@ int main(int argc, char** argv, char **envp) {
             installation2(jsonBinder);
 
         }
-        if(test){
+        if(test || install_test){
             sylvanmats::io::json::Path jp;
             jp["scripts"];
             jsonBinder(jp, [](std::string_view& key, std::any& val){
