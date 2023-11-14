@@ -22,6 +22,7 @@
 #include "npm/Remodeler.h"
 #include "npm/Removal.h"
 #include "npm/Outdated.h"
+#include "npm/Snap.h"
 #include "io/json/Binder.h"
 
 #include <typeinfo>
@@ -63,6 +64,7 @@ int main(int argc, char** argv, char **envp) {
         security.add_option("username", username, "git user name");
         security.add_option("passphrase", passphrase, "git pass phrase");
         security.configurable();
+        CLI::App &snap = *app.add_subcommand("snap", "Output snap craft yaml");
 
         CLI11_PARSE(app, argc, argv);
 
@@ -172,6 +174,16 @@ int main(int argc, char** argv, char **envp) {
                 }
             }
             if(!found)currentDirectory=currentDirectory.parent_path();
+            }
+        }
+        else if(snap){
+            sylvanmats::npm::Snap snap;
+            if(snap(jsonBinder, [](std::string& yamlContent){
+                std::string yamlName="snapcraft.yaml";
+                std::ofstream o(yamlName.c_str());
+                o << std::setw(4) << yamlContent;
+                o.close();
+            })){
             }
         }
 

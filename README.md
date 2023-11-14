@@ -30,6 +30,10 @@ Usage is from help
 
 This will work with any language and is most useful where there are dependent projects without packages.
 
+```
+cnpm snap //produces a snapscraft yaml
+```
+
 
 And we should be able to get speed from the modern use of c++ and eventually make it parallel.
 

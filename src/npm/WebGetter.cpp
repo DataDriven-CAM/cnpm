@@ -142,6 +142,7 @@ namespace sylvanmats::reading{
     SSL_load_error_strings();
     const SSL_METHOD *meth = TLS_client_method();
     SSL_CTX *ctx = SSL_CTX_new (meth);
+    SSL_CTX_set_timeout (ctx, 240);
     ssl = SSL_new (ctx);
     if (!ssl) {
         printf("Error creating SSL.\n");

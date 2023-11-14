@@ -76,6 +76,7 @@ namespace sylvanmats::npm{
                         }
                         recurseModules(localLinkPath);
                     }
+                    else std::cout<<"mercurial '"<<command<<"' failed"<<std::endl;
                 }
                     return;
                 }

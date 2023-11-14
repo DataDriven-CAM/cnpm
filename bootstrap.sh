@@ -25,6 +25,12 @@ fi
 if [ ! -d ~/.cnpm/cpp_modules/json-thresher ] ; then
   git clone https://github.com/DataDriven-CAM/json-thresher.git  ~/.cnpm/cpp_modules/json-thresher
   ln -s ~/.cnpm/cpp_modules/json-thresher cpp_modules/json-thresher
+  mkdir -p cpp_modules/json-thresher/cpp_modules
+  ln -s ~/.cnpm/cpp_modules/fmt cpp_modules/json-thresher/cpp_modules/fmt
+fi
+if [ ! -d ~/.cnpm/cpp_modules/xml-thresher ] ; then
+  git clone https://github.com/DataDriven-CAM/xml-thresher.git  ~/.cnpm/cpp_modules/xml-thresher
+  ln -s ~/.cnpm/cpp_modules/xml-thresher cpp_modules/xml-thresher
 fi
 if [ ! -d ~/.cnpm/cpp_modules/c-plus-plus-serializer ] ; then
   git clone https://github.com/goblinhack/c-plus-plus-serializer.git  ~/.cnpm/cpp_modules/c-plus-plus-serializer

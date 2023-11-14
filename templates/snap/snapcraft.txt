@@ -1,0 +1,20 @@
+name: {name}
+version: {version}
+summary: {summary}
+
+confinement: devmode
+
+parts:
+  {name}:
+    plugin:{plugin}
+    source-type: {source_type}
+    source: {url}
+{secondary_parts:}
+
+apps:
+  {name}:
+    command: {name}
+    environment:
+      "CNPM_HOME" "`pwd`"
+
+      

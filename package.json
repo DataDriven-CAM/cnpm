@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "dependency manager with or without manifests",
   "main": "main",
+  "repository": "https://github.com/DataDriven-CAM/cnpm.git",
   "scripts": {
     "zlib": "cd cpp_modules/zlib && make clean && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=dist . && make install",
     "ssl": "cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install",
