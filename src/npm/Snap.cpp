@@ -10,7 +10,7 @@
 #include <utility>
 
 namespace sylvanmats::npm{
-    Snap::Snap() : home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
+    Snap::Snap(std::string& moduleDirectory) : moduleDirectory (moduleDirectory), home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     bool Snap::operator()(sylvanmats::io::json::Binder& jsonBinder, std::function<void(std::string& yamlContent)> apply){
@@ -78,6 +78,24 @@ namespace sylvanmats::npm{
             }
             if(depUrl.syntax_ok() && !hitVersion){
                 std::string uri=(depUrl.host().empty()) ? "git://github.com/"+depUrl.path()+".git" : depUrl.as_string();
+                auto&& [scope, moduleName]=parseModuleName(key);
+                dependencyPlugin=std::string{"nil"};
+                std::filesystem::path localLinkPath=(!scope.empty()) ? std::filesystem::path(".")/moduleDirectory/scope/moduleName : std::filesystem::path(".")/moduleDirectory/moduleName;
+                if(std::filesystem::exists(localLinkPath)){
+                    for(auto& p: std::filesystem::directory_iterator(localLinkPath)){
+                        if(p.path().filename().compare("configure")==0 || p.path().filename().compare("config")==0 || p.path().filename().compare("configure.ac")==0){
+                            dependencyPlugin=std::string{"autotools"};
+                        }
+                        else if(p.path().filename().compare("CMakeLists.txt")==0){
+                            dependencyPlugin=std::string{"cmake"};
+                        }
+                    }
+                    for(auto& p: std::filesystem::directory_iterator(localLinkPath)){
+                        if(dependencyPlugin.compare("nil")==0 && p.path().filename().compare("Makefile")==0){
+                            dependencyPlugin=std::string{"make"};
+                        }
+                    }
+                }
                 dependencySourceType=std::string{"git"};
                 
 //                auto&& [scope, moduleName]=parseModuleName(key);

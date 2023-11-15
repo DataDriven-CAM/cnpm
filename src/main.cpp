@@ -177,7 +177,7 @@ int main(int argc, char** argv, char **envp) {
             }
         }
         else if(snap){
-            sylvanmats::npm::Snap snap;
+            sylvanmats::npm::Snap snap(moduleDirectory);
             if(snap(jsonBinder, [](std::string& yamlContent){
                 std::string yamlName="snapcraft.yaml";
                 std::ofstream o(yamlName.c_str());

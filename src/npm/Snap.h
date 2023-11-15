@@ -43,11 +43,12 @@ namespace sylvanmats::npm{
     };
     class Snap{
     protected:
+        std::string moduleDirectory;
         std::string home;
         std::string cnpmHome;
         std::vector<parts> secondaryParts;
     public:
-        Snap();
+        Snap(std::string& moduleDirectory);
         Snap(const Snap& orig) =  delete;
         virtual ~Snap() = default;
     public:
