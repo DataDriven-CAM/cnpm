@@ -2,6 +2,7 @@
 
 #include <string>
 #include <functional>
+#include <algorithm>
 
 #include "io/json/Binder.h"
 
@@ -26,7 +27,7 @@ struct fmt::formatter<std::vector<sylvanmats::npm::parts>>{
     plugin: {:s}
     source-type: {:s}
     source: {:s}
-)", fmt::make_format_args(v[i].key, v[i].plugin, v[i].sourceType, v[i].source));
+)", fmt::make_format_args(v[i].part, v[i].plugin, v[i].sourceType, v[i].source));
         }
         constexpr char* fmt={"\n"};
         return fmt::format_to(ctx.out(), fmt);
@@ -37,6 +38,7 @@ struct fmt::formatter<std::vector<sylvanmats::npm::parts>>{
 namespace sylvanmats::npm{
     struct parts{
         std::string_view key;
+        std::string part;
         std::string plugin;
         std::string sourceType;
         std::string source;

@@ -98,20 +98,25 @@ namespace sylvanmats::npm{
                 }
                 dependencySourceType=std::string{"git"};
                 
-//                auto&& [scope, moduleName]=parseModuleName(key);
-                secondaryParts.push_back({.key=key, .plugin=dependencyPlugin, .sourceType=dependencySourceType, .source=uri});
+                std::string part(key.begin(), key.end());
+                std::transform(part.cbegin(), part.cend(), part.begin(), [](unsigned char c) {return std::tolower(c);});
+                secondaryParts.push_back({.key=key, .part=part, .plugin=dependencyPlugin, .sourceType=dependencySourceType, .source=uri});
             }
 
         });
-        
+        std::string part(name.begin(), name.end());
+        std::transform(part.cbegin(), part.cend(), part.begin(), [](unsigned char c) {return std::tolower(c);});
         auto nameArg=fmt::arg("name", name);
         auto versionArg=fmt::arg("version", version);
         auto summaryArg=fmt::arg("summary", summary);
+        auto descriptionArg=fmt::arg("description", summary);
+        auto partArg=fmt::arg("part", part);
         auto pluginArg=fmt::arg("plugin", plugin);
         auto sourceTypeArg=fmt::arg("source_type", sourceType);
         auto urlArg=fmt::arg("url", url);
+        auto appArg=fmt::arg("app", part);
         auto secondaryPartsArg=fmt::arg("secondary_parts", secondaryParts);
-        std::string snapContent=fmt::vformat(snapTemplate, fmt::make_format_args(nameArg, versionArg, summaryArg, pluginArg, sourceTypeArg, urlArg, secondaryPartsArg));
+        std::string snapContent=fmt::vformat(snapTemplate, fmt::make_format_args(nameArg, versionArg, summaryArg, descriptionArg, partArg, pluginArg, sourceTypeArg, urlArg, appArg, secondaryPartsArg));
         apply(snapContent);
         return true;
     }

@@ -1,20 +1,22 @@
 name: {name}
 version: {version}
 summary: {summary}
+description: {description}
 
 confinement: devmode
+base: core20
 
 parts:
-  {name}:
-    plugin:{plugin}
+  {part}:
+    plugin: {plugin}
     source-type: {source_type}
     source: {url}
 {secondary_parts:}
 
 apps:
-  {name}:
+  {app}:
     command: {name}
     environment:
-      "CNPM_HOME" "`pwd`"
+      "CNPM_HOME": "`pwd`"
 
       
