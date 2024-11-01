@@ -37,6 +37,8 @@ int main(int argc, char** argv, char **envp) {
         std::string filename = "package.json";
         std::vector<std::string> positional;
         std::string packageName;
+        app.set_help_flag("--help", "Print this help message and exit");
+        app.get_formatter()->column_width(25);
         app.add_option("-f,--file,custom", positional, "input package");
         app.require_subcommand(0,1);
         bool dev{false};
@@ -54,6 +56,7 @@ int main(int argc, char** argv, char **envp) {
         CLI::App &remove = *app.add_subcommand("remove", "Removes packages from cpp_modules and from the project's package.json")->alias("rm");
         remove.add_option("name", packageName, "package name");
         remove.add_flag("-D,--save-dev", dev, "Save package to your 'devDependencies'");
+        CLI::App &update = *app.add_subcommand("update", "Updates packages to their latest version based on the specified range")->alias("up");
         CLI::App &prefix = *app.add_subcommand("prefix", "Display prefix");
         prefix.add_flag("-g,--global", global, "Display global prefix'");
         CLI::App &test = *app.add_subcommand("test", R"(Runs a package's "test" script, if one was provided)")->alias("t");
@@ -92,7 +95,7 @@ int main(int argc, char** argv, char **envp) {
             jsonBinder(jsonContent);
         }
  
-        bool update=false;
+        bool updateit=false;
         if(add){
             sylvanmats::npm::Addition addition;
             sylvanmats::io::json::Path jp=Root();
@@ -101,7 +104,7 @@ int main(int argc, char** argv, char **envp) {
                 //filename="test-"+filename;
                 std::ofstream o(filename.c_str());
                 o << std::setw(4) << jsonBinder;
-                update=true;
+                updateit=true;
             }
         }
         else if(rebuild){
@@ -111,7 +114,7 @@ int main(int argc, char** argv, char **envp) {
                 //filename="test-"+filename;
                 std::ofstream o(filename.c_str());
                 o << std::setw(4) << jsonBinder;
-                //update=true;
+                //updateit=true;
             }
         }
         else if(remove){
@@ -121,7 +124,7 @@ int main(int argc, char** argv, char **envp) {
                 //filename="test-"+filename;
                 std::ofstream o(filename.c_str());
                 o << std::setw(4) << jsonBinder;
-                update=true;
+                updateit=true;
             }
         }
         else if(link){
@@ -187,7 +190,7 @@ int main(int argc, char** argv, char **envp) {
             }
         }
 
-        if(install || install_test || update){
+        if(install || install_test || updateit){
             sylvanmats::io::json::Path jp;
             jp["dependencies"];
             sylvanmats::npm::Installation installation(moduleDirectory, jp);

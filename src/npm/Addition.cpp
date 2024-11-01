@@ -30,6 +30,8 @@ namespace sylvanmats::npm{
                 jb(type, [&tagExists](std::any& v){tagExists=true;});
                 if(!tagExists){
                     std::cout<<"not "<<type<<std::endl;
+                    sylvanmats::io::json::Path jp;
+                    jb(jp, type.string(), sylvanmats::io::json::object());
                 }
                 return jb(type, packageName.substr(index+1, packageName.length()-index), packageName);
             }

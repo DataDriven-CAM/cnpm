@@ -20,6 +20,7 @@
     "libgit2" : "libgit2/libgit2",
     "zlib" : "madler/zlib",
     "c-plus-plus-serializer" : "goblinhack/c-plus-plus-serializer",
+    "graph-v2": "stdgraph/graph-v2",
     "json-thresher": "DataDriven-CAM/json-thresher"
   },
     "devDependencies": {

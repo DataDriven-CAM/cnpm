@@ -10,9 +10,9 @@ if [ ! -d ~/.cnpm/cpp_modules/CLI11 ] ; then
   git clone https://github.com/CLIUtils/CLI11.git  ~/.cnpm/cpp_modules/CLI11
   ln -s ~/.cnpm/cpp_modules/CLI11 cpp_modules/CLI11
 fi
-if [ ! -d ~/.cnpm/cpp_modules/openssl ] ; then
-git clone -b OpenSSL_1_1_1w https://github.com/openssl/openssl.git  ~/.cnpm/cpp_modules/openssl
-ln -s ~/.cnpm/cpp_modules/openssl cpp_modules/openssl
+if [ ! -d ~/.cnpm/cpp_modules/openssl-openssl-3.3.1 ] ; then
+git clone -b openssl-3.3.1 https://github.com/openssl/openssl.git  ~/.cnpm/cpp_modules/openssl-openssl-3.3.1
+ln -s ~/.cnpm/cpp_modules/openssl-openssl-3.3.1 cpp_modules/openssl
 fi
 if [ ! -d ~/.cnpm/cpp_modules/libgit2 ] ; then
   git clone https://github.com/libgit2/libgit2.git  ~/.cnpm/cpp_modules/libgit2
@@ -27,6 +27,9 @@ if [ ! -d ~/.cnpm/cpp_modules/json-thresher ] ; then
   ln -s ~/.cnpm/cpp_modules/json-thresher cpp_modules/json-thresher
   mkdir -p cpp_modules/json-thresher/cpp_modules
   ln -s ~/.cnpm/cpp_modules/fmt cpp_modules/json-thresher/cpp_modules/fmt
+  ln -s ~/.cnpm/cpp_modules/mime-db-1.42.0 cpp_modules/json-thresher/cpp_modules/mime-db
+  ln -s ~/.cnpm/cpp_modules/json-graph-specification cpp_modules/json-thresher/cpp_modules/json-graph-specification
+  ln -s ~/.cnpm/cpp_modules/doctest cpp_modules/json-thresher/cpp_modules/doctest
 fi
 if [ ! -d ~/.cnpm/cpp_modules/xml-thresher ] ; then
   git clone https://github.com/DataDriven-CAM/xml-thresher.git  ~/.cnpm/cpp_modules/xml-thresher
@@ -57,6 +60,9 @@ echo "make libgit2"
 #cd cpp_modules/libgit2 && rm -rf build && mkdir -p build && cd build && ccmake -DCMAKE_INSTALL_PREFIX=`pwd`/../dist -DCMAKE_BUILD_TYPE=Release -DGIT_OPENSSL_DYNAMIC=ON -DOPENSSL_INCLUDE_DIR=`pwd`/../../openssl/openssl/include -DOPENSSL_CRYPTO_LIBRARY=`pwd`/../../openssl/openssl/lib/libcrypto.so  -DOPENSSL_SSL_LIBRARY=`pwd`/../../openssl/openssl/lib/libssl.so  .. && cmake --build . && make install
 #cd ../../..
 
+#unlink cpp_modules/json-thresher
+#pwd
+#ln -s `pwd`/../json-thresher cpp_modules/json-thresher
 #make -j3
 
 printf '\a'
