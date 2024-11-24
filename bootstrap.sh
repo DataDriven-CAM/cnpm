@@ -51,10 +51,10 @@ echo "make openssl"
 echo "make zurlcpp"
 #cd cpp_modules/urlcpp && mkdir -p test && cnpm install && pwd && make -f Makefile all
 #cd ../..
-echo "make json-thresher"
+#echo "make json-thresher"
 #cd cpp_modules/json-thresher && pwd && make -f Makefile all
 #cd ../..
-echo "make libgit2"
+#echo "make libgit2"
 #export CXXFLAGS="  ${CXXFLAGS}"
 #export LDFLAGS=" -L/usr/lib/x86_64-linux-gnu -ldl ${LDFLAGS}"
 #cd cpp_modules/libgit2 && rm -rf build && mkdir -p build && cd build && ccmake -DCMAKE_INSTALL_PREFIX=`pwd`/../dist -DCMAKE_BUILD_TYPE=Release -DGIT_OPENSSL_DYNAMIC=ON -DOPENSSL_INCLUDE_DIR=`pwd`/../../openssl/openssl/include -DOPENSSL_CRYPTO_LIBRARY=`pwd`/../../openssl/openssl/lib/libcrypto.so  -DOPENSSL_SSL_LIBRARY=`pwd`/../../openssl/openssl/lib/libssl.so  .. && cmake --build . && make install

@@ -158,7 +158,7 @@ namespace sylvanmats::reading{
         fflush(stdout);
         return false;
     }
-    //printf ("SSL connection using %s\n", SSL_get_cipher (ssl));
+//    printf ("SSL connection using %s\n", SSL_get_cipher (ssl));
     std::string escapedUrl=url::Url::escape_reserved_unsafe(urlStr);
 //std::cout<<"escapedUrl "<<escapedUrl<<std::endl;
     std::string request = "GET "+url.path()+" HTTP/1.1\r\nUser-Agent: cnpm/1.0.0\r\nAccept: "+acceptValue+"\r\nAccept-Encoding: identity\r\nHost: "+url.host()+"\r\nConnection: Keep-Alive\r\n\r\n\r\n";

@@ -63,7 +63,9 @@ int main(int argc, char** argv, char **envp) {
         CLI::App &install_test = *app.add_subcommand("install-test", R"(Runs a cnpm install followed immediately by a cnpm test)")->alias("it");
         app.set_config("--config", cnpmHome+"/config.toml", "Read a toml file");
         app.add_option("module-directory")->group("");
+        app.add_option("timeout")->group("");
         CLI::App &security = *app.add_subcommand("security", "Security properties in config file");
+        security.add_option("ssl-certification-location", sslCertificationLocation, "ssl certification location");
         security.add_option("username", username, "git user name");
         security.add_option("passphrase", passphrase, "git pass phrase");
         security.configurable();
@@ -72,6 +74,7 @@ int main(int argc, char** argv, char **envp) {
         CLI11_PARSE(app, argc, argv);
 
         std::string moduleDirectory=(app.count("module-directory"))? app.get_option("module-directory")->as<std::string>(): "cpp_modules";
+        size_t timeout=(app.count("timeout"))? app.get_option("timeout")->as<size_t>(): 240;
         username=(app.got_subcommand("security") && security.count("username"))? security.get_option("username")->as<std::string>(): "anonymous";
         passphrase=(app.got_subcommand("security") && security.count("passphrase"))? security.get_option("passphrase")->as<std::string>(): "";
         for(auto& o : positional | std::views::filter([](std::string& s){return s.ends_with(".json");}))
@@ -193,11 +196,11 @@ int main(int argc, char** argv, char **envp) {
         if(install || install_test || updateit){
             sylvanmats::io::json::Path jp;
             jp["dependencies"];
-            sylvanmats::npm::Installation installation(moduleDirectory, jp);
+            sylvanmats::npm::Installation installation(sslCertificationLocation, moduleDirectory, timeout, jp);
             installation(jsonBinder);
             sylvanmats::io::json::Path jp2;
             jp2["devDependencies"];
-            sylvanmats::npm::Installation installation2(moduleDirectory, jp2);
+            sylvanmats::npm::Installation installation2(sslCertificationLocation, moduleDirectory, timeout, jp2);
             installation2(jsonBinder);
 
         }

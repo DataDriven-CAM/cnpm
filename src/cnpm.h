@@ -1,5 +1,6 @@
 #pragma once
 
+static std::string sslCertificationLocation{};
 static std::string username{};
 static std::string passphrase{};
 

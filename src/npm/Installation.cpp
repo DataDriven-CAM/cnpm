@@ -23,7 +23,7 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation(std::string& moduleDirectory, sylvanmats::io::json::Path type) : moduleDirectory (moduleDirectory), type (type), home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
+    Installation::Installation(std::string& sslCertificationLocation, std::string& moduleDirectory, size_t timeout, sylvanmats::io::json::Path type) : sslCertificationLocation (sslCertificationLocation), moduleDirectory (moduleDirectory), timeout (timeout), type (type), home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Installation::operator()(std::string& packageName){
@@ -84,7 +84,7 @@ namespace sylvanmats::npm{
                 return;
             }
             url::Url url(std::string{val});
-//            std::cout<<val<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
+//            std::cout<<val<<"\t"<<url.has_scheme()<<" "<<url.host().empty()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
             bool hitVersion=false;
             if(url.host().empty()){
                 auto&& [scope, moduleName]=parseModuleName(key);
@@ -130,23 +130,24 @@ namespace sylvanmats::npm{
                 if(hitVersion)recurseModules(localLinkPath);
             }
             if(url.syntax_ok() && !hitVersion){
-                std::string uri=(url.host().empty()) ? "git://github.com/"+url.path()+".git" : url.as_string();
+                std::string uri=(url.host().empty()) ? "https://github.com/"+url.path()+".git" : url.as_string();
                 auto&& [scope, moduleName]=parseModuleName(key);
                 std::filesystem::path localLinkPath=(!scope.empty()) ? std::filesystem::path(".")/moduleDirectory/scope/moduleName : std::filesystem::path(".")/moduleDirectory/moduleName;
                 std::filesystem::path localPath= (!scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/scope/moduleName : std::filesystem::path(home)/".cnpm"/moduleDirectory/moduleName;
                 std::string oid="";
                 if(!std::filesystem::exists(localPath)){
                     git_libgit2_init();
-                    //git_libgit2_opts(GIT_OPT_SET_SSL_CERT_LOCATIONS, nullptr, cnpmHome.c_str());
+                    git_libgit2_opts(GIT_OPT_SET_SSL_CERT_LOCATIONS, nullptr, sslCertificationLocation.c_str());
                     git_clone_options opts=GIT_CLONE_OPTIONS_INIT;
 //                                int err=git_clone_options_init(&opts, GIT_CLONE_OPTIONS_VERSION);
                     cb_payload cbPayload;
                     cbPayload.publickey=cnpmHome+"/key.pem";
                     cbPayload.privatekey=cnpmHome+"/cert.pem";
-                    cbPayload.cberr=1;
+                    //cbPayload.cberr=1;
                     opts.checkout_opts=GIT_CHECKOUT_OPTIONS_INIT;
                     opts.checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
                     opts.fetch_opts=GIT_FETCH_OPTIONS_INIT;
+                    opts.fetch_opts.depth=1;
                     opts.fetch_opts.callbacks.payload=&cbPayload;
                     opts.fetch_opts.callbacks.credentials=[](git_credential **out, const char *url, const char *username_from_url, unsigned int allowed_types, void *payload)->int{
                         std::cout<<"allowed_types "<<allowed_types<<std::endl;
@@ -166,16 +167,25 @@ namespace sylvanmats::npm{
                         return cbPayload->cberr;
                     };
                     opts.fetch_opts.callbacks.sideband_progress=[](const char *str, int len, void *payload)->int{
-                            (void)payload; /* unused */
+                        cb_payload* cbPayload=(cb_payload*)(payload);
 
                             std::printf("remote: %.*s", len, str);
                             std::cout.flush();
-                            return 0;
+                            return cbPayload->cberr;
                     };
-//                                opts.fetch_opts.callbacks.transfer_progress=
+                    opts.fetch_opts.callbacks.transfer_progress=[](const git_indexer_progress *stats, void *payload)->int{
+                        cb_payload* cbPayload=(cb_payload*)(payload);
+                        if((stats->received_objects % 100 ==0) || stats->received_objects==stats->total_objects)
+                            std::cout<<"\r"<<stats->received_objects<<" of "<<stats->total_objects<<std::flush;
+                        else
+                            cbPayload->counter++;
+                        return cbPayload->cberr;
+                    };
 //                                opts.fetch_opts.callbacks.certificate_check
                     git_repository *gitRepository;
-                    std::string lpath={ std::begin(localPath.string()), std::end(localPath.string()) };
+                    std::string lpath=localPath.string();
+                    git_libgit2_opts(GIT_OPT_SET_SERVER_CONNECT_TIMEOUT, timeout*1000);
+                    git_libgit2_opts(GIT_OPT_SET_SERVER_TIMEOUT, timeout*1000);
                     int err= git_clone(&gitRepository, uri.c_str(), lpath.c_str(), &opts);
                     if(err!=0)
                         std::cout<<"err "<<err<<" "<<git_error_last()->klass<<" "<<git_error_last()->message<<std::endl;

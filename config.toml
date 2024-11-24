@@ -1,6 +1,8 @@
 module-directory = "cpp_modules"
+timeout =  300
 
 [security]
+ssl-certification-location = "/etc/ssl/certs"
 username = ""
 passphrase = ""
 

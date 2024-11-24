@@ -15,17 +15,21 @@ namespace sylvanmats::npm{
         std::string privatekey;
         git_credential* gitCredential;
         int cberr=0;
+        int counter=0;
     };
 
     class Installation{
     protected:
+        std::string sslCertificationLocation;
         std::string moduleDirectory;
+        size_t timeout;
         sylvanmats::io::json::Path type;
         std::string home;
         std::string cnpmHome;
         unsigned int depth=0;
     public:
-        Installation(std::string& moduleDirectory, sylvanmats::io::json::Path type);
+        Installation() = delete;
+        Installation(std::string& sslCertificationLocation, std::string& moduleDirectory, size_t timeout, sylvanmats::io::json::Path type);
         Installation(const Installation& orig) =  delete;
         virtual ~Installation() = default;
     public:

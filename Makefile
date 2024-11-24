@@ -5,7 +5,7 @@ ifeq ($(OS),Windows_NT)
   libprefix=lib
 endif
 
-LDFLAGS= -Wl,-rpath,"$$ORIGIN/cpp_modules/openssl/openssl/lib":"`pwd`/cpp_modules/openssl/openssl/lib":"`pwd`/cpp_modules/libgit2/dist/lib":"`pwd`/cpp_modules/urlcpp":"`pwd`/cpp_modules/json-thresher":"/home/roger/Software/gcc-dev/dist/lib64" -L./cpp_modules/json-thresher -L./cpp_modules/libgit2/dist/lib -L./cpp_modules/urlcpp -L./cpp_modules/openssl/openssl/lib -Lcpp_modules/zlib/dist/lib  -l$(libprefix)jsonthresher -l$(libprefix)urlcpp -l$(libprefix)git2 -l$(libprefix)crypto -l$(libprefix)ssl -l$(libprefix)z -Wl,--allow-multiple-definition
+LDFLAGS= -Wl,-rpath,"$$ORIGIN/cpp_modules/openssl/openssl/lib":"`pwd`/cpp_modules/openssl/openssl/lib":"`pwd`/cpp_modules/libgit2/dist/lib":"`pwd`/cpp_modules/urlcpp":"`pwd`/cpp_modules/json-thresher":"/home/roger/Software/gcc-dev/dist/lib64" -L./cpp_modules/fmt/dist/lib -L./cpp_modules/json-thresher -L./cpp_modules/libgit2/dist/lib -L./cpp_modules/urlcpp -L./cpp_modules/openssl/openssl/lib -Lcpp_modules/zlib/dist/lib  -l$(libprefix)fmt -l$(libprefix)jsonthresher -l$(libprefix)urlcpp -l$(libprefix)git2 -l$(libprefix)crypto -l$(libprefix)ssl -l$(libprefix)z -Wl,--allow-multiple-definition
 ifeq ($(OS),Windows_NT)
 LDFLAGS+= C:/Windows/System32/ws2_32.dll
 endif
