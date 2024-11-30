@@ -135,8 +135,13 @@ int main(int argc, char** argv, char **envp) {
             std::string moduleName=localPath.filename().string();
             std::filesystem::path localLinkPath="./"+moduleDirectory+"/"+moduleName;
             if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath)){
-                std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                std::filesystem::path backPath="../";
+                if(localPath.is_relative())
+                    std::filesystem::create_directory_symlink(backPath/localPath, localLinkPath);
+                else
+                    std::filesystem::create_directory_symlink(localPath, localLinkPath);
             }
+            else if(!std::filesystem::exists(localPath))std::cout<<localPath<<" doesn't exist."<<std::endl;
         }
         else if(outdated){
             sylvanmats::npm::Outdated outdated;
