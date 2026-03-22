@@ -37,3 +37,5 @@ cpp_modules
 .vscode
 /nbproject/
 /test/myproject/
+gcc-dev
+*.pem
