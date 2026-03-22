@@ -37,7 +37,8 @@ int main(int argc, char** argv, char **envp) {
         std::string filename = "package.json";
         std::vector<std::string> positional;
         std::string packageName;
-        app.set_help_flag("--help", "Print this help message and exit");
+        //app.set_help_flag("-h,--help", "Print this help message and exit");
+        //app.set_help_all_flag("--help-all", "Expand all help");
         app.get_formatter()->column_width(25);
         app.add_option("-f,--file,custom", positional, "input package");
         app.require_subcommand(0,1);

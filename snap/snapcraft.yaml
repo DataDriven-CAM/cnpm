@@ -1,0 +1,73 @@
+name: cnpm
+version: 1.0.0
+summary: dependency manager with or without manifests
+description: dependency manager with or without manifests
+
+confinement: devmode
+base: core24
+
+
+parts:
+  my-gcc-toolchain:
+    plugin: dump
+    source: ./gcc-dev/dist/
+    source-type: local
+  urlcpp:
+    plugin: make
+    source-type: git
+    source: https://github.com/rimmartin/urlcpp.git
+  cli11:
+    plugin: nil
+    source-type: git
+    source: https://github.com/CLIUtils/CLI11.git
+  libgit2:
+    plugin: cmake
+    source-type: git
+    source: https://github.com/libgit2/libgit2.git
+    stage-packages:
+      - libssl3
+  zlib:
+    plugin: cmake
+    source-type: git
+    source: https://github.com/madler/zlib.git
+  graph-v2:
+    plugin: dump
+    source-type: git
+    source: https://github.com/stdgraph/graph-v2.git
+  c-plus-plus-serializer:
+    plugin: nil
+    source-type: git
+    source: https://github.com/goblinhack/c-plus-plus-serializer.git
+  json-thresher:
+    plugin: make
+    source-type: git
+    source: https://github.com/DataDriven-CAM/json-thresher.git
+    after: [my-gcc-toolchain, graph-v2]
+    build-environment:
+     - MODULE_DIRECTORY: "$SNAPCRAFT_STAGE"
+    override-build: |
+      export PATH="$SNAPCRAFT_PART_INSTALL/gcc-dev/dist/bin:$PATH"
+      export CC="$SNAPCRAFT_PART_INSTALL/gcc-dev/dist/bin/gcc"
+      export CXX="$SNAPCRAFT_PART_INSTALL/gcc-dev/dist/bin/g++"
+      echo ${SNAPCRAFT_STAGE}
+      echo ${MODULE_DIRECTORY}
+      snapcraftctl build
+  cnpm:
+    plugin: make
+    source-type: git
+    source: https://github.com/DataDriven-CAM/cnpm.git
+    after: [urlcpp, cli11, libgit2, zlib, c-plus-plus-serializer, json-thresher]
+    stage-packages:
+      - libssl3
+
+
+
+apps:
+  cnpm:
+    command: cnpm
+    environment:
+      "CNPM_HOME": "`pwd`"
+    plugs:
+      - home
+
+      

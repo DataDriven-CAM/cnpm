@@ -16,11 +16,11 @@
   "dependencies": {
     "urlcpp": "rimmartin/urlcpp",
     "CLI11": "CLIUtils/CLI11",
-    "openssl" : "openssl/openssl#OpenSSL_1_1_1w",
+    "openssl" : "openssl/openssl#openssl-3.5.0",
     "libgit2" : "libgit2/libgit2",
     "zlib" : "madler/zlib",
     "c-plus-plus-serializer" : "goblinhack/c-plus-plus-serializer",
-    "graph-v2": "stdgraph/graph-v2",
+    "graph-v3": "stdgraph/graph-v3",
     "json-thresher": "DataDriven-CAM/json-thresher"
   },
     "devDependencies": {

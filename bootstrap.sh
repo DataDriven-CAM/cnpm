@@ -10,9 +10,9 @@ if [ ! -d ~/.cnpm/cpp_modules/CLI11 ] ; then
   git clone https://github.com/CLIUtils/CLI11.git  ~/.cnpm/cpp_modules/CLI11
   ln -s ~/.cnpm/cpp_modules/CLI11 cpp_modules/CLI11
 fi
-if [ ! -d ~/.cnpm/cpp_modules/openssl-openssl-3.3.1 ] ; then
-git clone -b openssl-3.3.1 https://github.com/openssl/openssl.git  ~/.cnpm/cpp_modules/openssl-openssl-3.3.1
-ln -s ~/.cnpm/cpp_modules/openssl-openssl-3.3.1 cpp_modules/openssl
+if [ ! -d ~/.cnpm/cpp_modules/openssl-openssl-3.5.0 ] ; then
+git clone -b openssl-3.5.0 https://github.com/openssl/openssl.git  ~/.cnpm/cpp_modules/openssl-openssl-3.5.0
+ln -s ~/.cnpm/cpp_modules/openssl-openssl-3.5.0 cpp_modules/openssl
 fi
 if [ ! -d ~/.cnpm/cpp_modules/libgit2 ] ; then
   git clone https://github.com/libgit2/libgit2.git  ~/.cnpm/cpp_modules/libgit2
@@ -46,14 +46,14 @@ echo "make zlib"
 #cd cpp_modules/zlib && pwd && which cmake #&& make clean #&& cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=dist . && make install
 #cd ../..
 echo "make openssl"
-#cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make && make install
+#cd cpp_modules/openssl && ./config shared --prefix=`pwd`/openssl --openssldir=`pwd`/openssl/openssl && make -j3 && make install
 #cd ../..
 echo "make zurlcpp"
 #cd cpp_modules/urlcpp && mkdir -p test && cnpm install && pwd && make -f Makefile all
 #cd ../..
-#echo "make json-thresher"
-#cd cpp_modules/json-thresher && pwd && make -f Makefile all
-#cd ../..
+echo "make json-thresher"
+cd cpp_modules/json-thresher && pwd && export MODULE_DIRECTORY=../ && make -f Makefile all
+cd ../..
 #echo "make libgit2"
 #export CXXFLAGS="  ${CXXFLAGS}"
 #export LDFLAGS=" -L/usr/lib/x86_64-linux-gnu -ldl ${LDFLAGS}"
@@ -63,6 +63,7 @@ echo "make zurlcpp"
 #unlink cpp_modules/json-thresher
 #pwd
 #ln -s `pwd`/../json-thresher cpp_modules/json-thresher
-#make -j3
+pwd
+make -j3
 
 printf '\a'
