@@ -23,7 +23,8 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation(std::string& sslCertificationLocation, std::string& moduleDirectory, size_t timeout, sylvanmats::io::json::Path type) : sslCertificationLocation (sslCertificationLocation), moduleDirectory (moduleDirectory), timeout (timeout), type (type), home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
+    Installation::Installation(std::string& sslCertificationLocation, std::string& moduleDirectory, size_t timeout, sylvanmats::io::json::Path type, sylvanmats::npm::RelationalGraph& relationalGraph) : sslCertificationLocation (sslCertificationLocation), moduleDirectory (moduleDirectory), timeout (timeout), type (type), relationalGraph (relationalGraph),
+         home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
     }
     
     void Installation::operator()(std::string& packageName){
@@ -34,6 +35,7 @@ namespace sylvanmats::npm{
             unsigned int index=url.path().rfind('/');
             if(index!=std::string::npos){
                 std::string_view key{packageName.substr(index+1, packageName.length()-index)};
+                relationalGraph(sylvanmats::npm::project_properties{key, packageName, url.as_string(), "", "", "", ""});
                 std::string_view val{packageName};
                 install(key, val);
             }
@@ -50,6 +52,7 @@ namespace sylvanmats::npm{
     
     void Installation::install(std::string_view& key, std::string_view& val){
             if(depth>=2)return;
+            relationalGraph(sylvanmats::npm::project_properties{key, val, "", "", "", "", ""});
             if(val.starts_with("hg+")){
                 if(val.starts_with("hg+https")){
                 auto&& [scope, moduleName]=parseModuleName(key);
@@ -279,6 +282,7 @@ namespace sylvanmats::npm{
             sylvanmats::io::json::Path jp;
             jp["bin"];
             jb(jp, [&](std::string_view& key, std::any& v){
+                relationalGraph(sylvanmats::npm::project_properties{key, std::any_cast<std::string_view>(v), "", "", "", "", ""});
                 std::filesystem::path execLinkPath=binPath;
                 execLinkPath/=key;
                 std::filesystem::path execPath=localLinkPath;

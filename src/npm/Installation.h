@@ -4,6 +4,8 @@
 #include <tuple>
 #include <filesystem>
 
+#include "npm/RelationalGraph.h"
+
 #include "io/json/Binder.h"
 
 #include "git2.h"
@@ -24,12 +26,13 @@ namespace sylvanmats::npm{
         std::string moduleDirectory;
         size_t timeout;
         sylvanmats::io::json::Path type;
+        sylvanmats::npm::RelationalGraph& relationalGraph;
         std::string home;
         std::string cnpmHome;
         unsigned int depth=0;
     public:
         Installation() = delete;
-        Installation(std::string& sslCertificationLocation, std::string& moduleDirectory, size_t timeout, sylvanmats::io::json::Path type);
+        Installation(std::string& sslCertificationLocation, std::string& moduleDirectory, size_t timeout, sylvanmats::io::json::Path type, sylvanmats::npm::RelationalGraph& relationalGraph);
         Installation(const Installation& orig) =  delete;
         virtual ~Installation() = default;
     public:

@@ -30,10 +30,10 @@ parts:
     plugin: cmake
     source-type: git
     source: https://github.com/madler/zlib.git
-  graph-v2:
+  graph-v3:
     plugin: dump
     source-type: git
-    source: https://github.com/stdgraph/graph-v2.git
+    source: https://github.com/stdgraph/graph-v3.git
   c-plus-plus-serializer:
     plugin: nil
     source-type: git
@@ -42,7 +42,7 @@ parts:
     plugin: make
     source-type: git
     source: https://github.com/DataDriven-CAM/json-thresher.git
-    after: [my-gcc-toolchain, graph-v2]
+    after: [my-gcc-toolchain, graph-v3]
     build-environment:
      - MODULE_DIRECTORY: "$SNAPCRAFT_STAGE"
     override-build: |
@@ -66,7 +66,7 @@ apps:
   cnpm:
     command: cnpm
     environment:
-      "CNPM_HOME": "`pwd`"
+      CNPM_HOME: "$SNAP"
     plugs:
       - home
 

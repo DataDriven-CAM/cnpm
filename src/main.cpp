@@ -200,15 +200,18 @@ int main(int argc, char** argv, char **envp) {
         }
 
         if(install || install_test || updateit){
+            sylvanmats::npm::RelationalGraph relationalGraph;
             sylvanmats::io::json::Path jp;
             jp["dependencies"];
-            sylvanmats::npm::Installation installation(sslCertificationLocation, moduleDirectory, timeout, jp);
+            sylvanmats::npm::Installation installation(sslCertificationLocation, moduleDirectory, timeout, jp, relationalGraph);
             installation(jsonBinder);
             sylvanmats::io::json::Path jp2;
             jp2["devDependencies"];
-            sylvanmats::npm::Installation installation2(sslCertificationLocation, moduleDirectory, timeout, jp2);
+            sylvanmats::npm::Installation installation2(sslCertificationLocation, moduleDirectory, timeout, jp2, relationalGraph);
             installation2(jsonBinder);
-
+            std::ofstream o("relationalGraph.json");
+            o<<relationalGraph;
+            o.close();
         }
         if(test || install_test){
             sylvanmats::io::json::Path jp;
