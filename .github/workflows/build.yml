@@ -57,18 +57,7 @@ jobs:
         git clone https://github.com/fmtlib/fmt.git ~/.cnpm/cpp_modules/fmt
         ln -sf ~/.cnpm/cpp_modules/fmt cpp_modules/fmt
 
-    - name: Debug Runner Directory Layout
-      run: |
-        echo "=== Current Workspace ===="
         g++ --version
-        pwd
-        ls -la
-        echo "=== Local cpp_modules Layout ==="
-        ls -la cpp_modules/ || true
-        echo "=== Global .cnpm User Layout ==="
-        ls -la ~/.cnpm/cpp_modules/ || true
-        echo "=== Searching for doctest.h structural locations ==="
-        find ~/ -name "doctest.h" 2>/dev/null || true
 
         # 4. Compile modules sequentially
         echo "Building sub-modules..."
