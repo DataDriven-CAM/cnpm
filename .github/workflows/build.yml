@@ -17,13 +17,13 @@ jobs:
     - name: Install System Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y g++-13 cmake libssl-dev zlib1g-dev
+        sudo apt-get install -y g++-14 cmake libssl-dev zlib1g-dev
 
     - name: Bootstrap and Build
       env:
-        # Force the worker to build via g++-13 
-        CC: gcc-13
-        CXX: g++-13
+        # Force the worker to build via g++-14 
+        CC: gcc-14
+        CXX: g++-14
       run: |
         # 1. Replicate directory architecture
         mkdir -p ~/.cnpm/cpp_modules
