@@ -38,21 +38,21 @@ namespace sylvanmats::npm{
                 SymanticVersioning symanticVersioning(true);
                 symanticVersioning(val, [&moduleName, &hitVersion, &currentPackageName](std::string_view base, std::string_view wildcard){
                     if(base.compare(wildcard)==0)return;
-                    sylvanmats::reading::WebGetter webGetter;
+                    // sylvanmats::reading::WebGetter webGetter;
                     std::string uri = "https://registry.npmjs.org/"+moduleName+"/"+std::string(wildcard);
                     std::string fileName=moduleName+".json";
                     std::filesystem::path tmpPath=std::filesystem::temp_directory_path()/fileName;
 //                    std::cout<<"t file "<<tmpPath<<std::endl;
-                    webGetter(uri, [&moduleName, &base, &currentPackageName](std::istream& is){
-                        sylvanmats::io::json::Binder jsonBinder;
-                        jsonBinder(is);
-                        sylvanmats::io::json::Path jp;
-                        jp["version"];
-                        jsonBinder(jp, [&](std::any& v){
-                          std::cout<<moduleName<<" "<<base<<" "<<std::any_cast<std::string_view>(v)<<" "<<currentPackageName<<std::endl;  
-                        });
-                        //std::cout<<jsonBinder<<std::endl;
-                    });
+                    // webGetter(uri, [&moduleName, &base, &currentPackageName](std::istream& is){
+                    //     sylvanmats::io::json::Binder jsonBinder;
+                    //     jsonBinder(is);
+                    //     sylvanmats::io::json::Path jp;
+                    //     jp["version"];
+                    //     jsonBinder(jp, [&](std::any& v){
+                    //       std::cout<<moduleName<<" "<<base<<" "<<std::any_cast<std::string_view>(v)<<" "<<currentPackageName<<std::endl;  
+                    //     });
+                    //     //std::cout<<jsonBinder<<std::endl;
+                    // });
                     
                 });
             }

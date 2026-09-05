@@ -8,8 +8,6 @@
 
 #include "io/json/Binder.h"
 
-#include "git2.h"
-
 namespace sylvanmats::npm{
 
     class Addition{

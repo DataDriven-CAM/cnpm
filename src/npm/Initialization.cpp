@@ -1,9 +1,8 @@
 #include <filesystem>
-
-#include "npm/Initialization.h"
-
 #include <format>
 #include <utility>
+
+#include "npm/Initialization.h"
 
 namespace sylvanmats::npm{
     

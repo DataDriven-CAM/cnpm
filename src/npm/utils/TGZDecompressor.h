@@ -16,7 +16,7 @@
 
 #include "c_plus_plus_serializer.h"
 
-namespace sylvanmats::npm{
+namespace sylvanmats::npm::utils{
 
 /* values used in typeflag field */
 

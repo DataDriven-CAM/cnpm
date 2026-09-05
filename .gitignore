@@ -33,7 +33,7 @@
 
 build
 /cnpm
-cpp_modules
+cpp_modules/
 .vscode
 /nbproject/
 /test/myproject/

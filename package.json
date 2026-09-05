@@ -14,11 +14,9 @@
   "license": "MIT",
   "private": null,
   "dependencies": {
+    "stdexec": "nvidia/stdexec",
     "urlcpp": "rimmartin/urlcpp",
     "CLI11": "CLIUtils/CLI11",
-    "openssl" : "openssl/openssl#openssl-4.0.0",
-    "libgit2" : "libgit2/libgit2",
-    "zlib" : "madler/zlib",
     "c-plus-plus-serializer" : "goblinhack/c-plus-plus-serializer",
     "graph-v3": "stdgraph/graph-v3",
     "json-thresher": "DataDriven-CAM/json-thresher"

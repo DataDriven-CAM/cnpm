@@ -13,7 +13,7 @@ namespace sylvanmats::npm{
         SymanticVersioning(const SymanticVersioning* orig) = delete;
         virtual ~SymanticVersioning() = default;
     public:
-        void operator()(std::string_view& val, std::function<void(std::string_view base, std::string_view wildcard)> apply){
+        bool operator()(std::string_view& val, std::function<void(std::string_view base, std::string_view wildcard)> apply){
             std::regex versionExpression(R"((\^|\~)?((\d+)(\.(\d+|x)(\.(\d+|x))?)?))");
             std::smatch versionMatch;
             std::string semanticVersion=std::string{val};
@@ -51,7 +51,9 @@ namespace sylvanmats::npm{
                 wildcard=major+"."+minor+"."+patch;
 //                std::cout << val << " becomes " << wildcard <<" "<<major<<" "<<minor<<" "<<patch<<" "<< '\n';
                 apply(std::string_view{version}, std::string_view{wildcard});
+                return true;
             }
+            return false;
         }
     };
 

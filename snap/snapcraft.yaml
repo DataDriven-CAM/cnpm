@@ -20,16 +20,6 @@ parts:
     plugin: nil
     source-type: git
     source: https://github.com/CLIUtils/CLI11.git
-  libgit2:
-    plugin: cmake
-    source-type: git
-    source: https://github.com/libgit2/libgit2.git
-    stage-packages:
-      - libssl3
-  zlib:
-    plugin: cmake
-    source-type: git
-    source: https://github.com/madler/zlib.git
   graph-v3:
     plugin: dump
     source-type: git
@@ -56,7 +46,7 @@ parts:
     plugin: make
     source-type: git
     source: https://github.com/DataDriven-CAM/cnpm.git
-    after: [urlcpp, cli11, libgit2, zlib, c-plus-plus-serializer, json-thresher]
+    after: [urlcpp, cli11, zlib, c-plus-plus-serializer, json-thresher]
     stage-packages:
       - libssl3
 
