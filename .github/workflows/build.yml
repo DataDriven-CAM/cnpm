@@ -31,6 +31,10 @@ jobs:
         
         # 2. Replicate bootstrap symlinking rules
         echo "Cloning and linking dependencies..."
+
+        git clone https://github.com/onqtam/doctest.git ~/.cnpm/cpp_modules/doctest
+        ln -sf ~/.cnpm/cpp_modules/doctest cpp_modules/doctest
+
         git clone https://github.com/rimmartin/urlcpp.git ~/.cnpm/cpp_modules/urlcpp
         ln -sf ~/.cnpm/cpp_modules/urlcpp cpp_modules/urlcpp
         
