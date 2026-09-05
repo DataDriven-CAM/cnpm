@@ -54,6 +54,9 @@ jobs:
         git clone https://github.com/nvidia/stdexec.git ~/.cnpm/cpp_modules/stdexec
         ln -sf ~/.cnpm/cpp_modules/stdexec cpp_modules/stdexec
 
+        git clone https://github.com/fmtlib/fmt.git ~/.cnpm/cpp_modules/fmt
+        ln -sf ~/.cnpm/cpp_modules/fmt cpp_modules/fmt
+
     - name: Debug Runner Directory Layout
       run: |
         echo "=== Current Workspace ==="
@@ -65,7 +68,7 @@ jobs:
         ls -la ~/.cnpm/cpp_modules/ || true
         echo "=== Searching for doctest.h structural locations ==="
         find ~/ -name "doctest.h" 2>/dev/null || true
-                
+
         # 4. Compile modules sequentially
         echo "Building sub-modules..."
         export MODULE_DIRECTORY=../
@@ -73,7 +76,7 @@ jobs:
         
         cd cpp_modules/json-thresher
         mkdir -p cpp_modules
-        git clone https://github.com cpp_modules/fmt
+        git clone https://github.com/fmtlib/fmt.git cpp_modules/fmt
         export MODULE_DIRECTORY=../
         make -f Makefile all
         cd ../..
