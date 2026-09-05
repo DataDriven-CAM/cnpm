@@ -57,6 +57,12 @@ jobs:
         git clone https://github.com/fmtlib/fmt.git ~/.cnpm/cpp_modules/fmt
         ln -sf ~/.cnpm/cpp_modules/fmt cpp_modules/fmt
 
+        git clone https://github.com/TartanLlama/expected.git ~/.cnpm/cpp_modules/expected
+        ln -sf ~/.cnpm/cpp_modules/expected cpp_modules/expected
+
+        git clone https://github.com/stdgraph/graph-v3.git ~/.cnpm/cpp_modules/graph-v3
+        ln -sf ~/.cnpm/cpp_modules/graph-v3 cpp_modules/graph-v3
+
         g++ --version
 
         # 4. Compile modules sequentially
