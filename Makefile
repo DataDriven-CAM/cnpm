@@ -13,7 +13,7 @@ ifeq ($(OS),Windows_NT)
 LDFLAGS+= C:/Windows/System32/ws2_32.dll
 endif
 all: build/src/npm/Initialization.o build/src/npm/Installation.o build/src/npm/Addition.o build/src/npm/Remodeler.o build/src/npm/Removal.o build/src/npm/Outdated.o build/src/npm/Snap.o build/src/main.o
-	$(CXX) $(LDFLAGS) -o cnpm $(wildcard build/src/*.o) $(wildcard build/src/npm/*.o) $(LDLIBS)
+	$(CXX) -o cnpm $(wildcard build/src/*.o) $(wildcard build/src/npm/*.o) $(LDFLAGS) $(LDLIBS)
 
 CXXFLAGS=-std=c++26 -DNDEBUG -O3 -I./src -I./cpp_modules/fmt/dist/include -I./cpp_modules/expected/include -I./cpp_modules/graph-v3/include -I./cpp_modules/json-thresher/include -MMD
 build/src/npm/Initialization.o: src/npm/Initialization.cpp
