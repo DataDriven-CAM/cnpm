@@ -12,14 +12,6 @@ if [ ! -d ~/.cnpm/cpp_modules/CLI11 ] ; then
   git clone https://github.com/CLIUtils/CLI11.git  ~/.cnpm/cpp_modules/CLI11
   ln -s ~/.cnpm/cpp_modules/CLI11 cpp_modules/CLI11
 fi
-if [ ! -d ~/.cnpm/cpp_modules/openssl-openssl-4.0.0 ] ; then
-git clone -b openssl-4.0.0 https://github.com/openssl/openssl.git  ~/.cnpm/cpp_modules/openssl-openssl-4.0.0
-ln -s ~/.cnpm/cpp_modules/openssl-openssl-4.0.0 cpp_modules/openssl
-fi
-if [ ! -d ~/.cnpm/cpp_modules/libgit2 ] ; then
-  git clone https://github.com/libgit2/libgit2.git  ~/.cnpm/cpp_modules/libgit2
-  ln -s ~/.cnpm/cpp_modules/libgit2 cpp_modules/libgit2
-fi
 if [ ! -d ~/.cnpm/cpp_modules/zlib ] ; then
   git clone https://github.com/madler/zlib.git  ~/.cnpm/cpp_modules/zlib
   ln -s ~/.cnpm/cpp_modules/zlib cpp_modules/zlib
@@ -32,10 +24,6 @@ if [ ! -d ~/.cnpm/cpp_modules/json-thresher ] ; then
   ln -s ~/.cnpm/cpp_modules/mime-db-1.42.0 cpp_modules/json-thresher/cpp_modules/mime-db
   ln -s ~/.cnpm/cpp_modules/json-graph-specification cpp_modules/json-thresher/cpp_modules/json-graph-specification
   ln -s ~/.cnpm/cpp_modules/doctest cpp_modules/json-thresher/cpp_modules/doctest
-fi
-if [ ! -d ~/.cnpm/cpp_modules/xml-thresher ] ; then
-  git clone https://github.com/DataDriven-CAM/xml-thresher.git  ~/.cnpm/cpp_modules/xml-thresher
-  ln -s ~/.cnpm/cpp_modules/xml-thresher cpp_modules/xml-thresher
 fi
 if [ ! -d ~/.cnpm/cpp_modules/c-plus-plus-serializer ] ; then
   git clone https://github.com/goblinhack/c-plus-plus-serializer.git  ~/.cnpm/cpp_modules/c-plus-plus-serializer
