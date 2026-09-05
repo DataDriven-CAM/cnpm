@@ -1,0 +1,67 @@
+name: Build cnpm
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++-13 cmake libssl-dev zlib1g-dev
+
+    - name: Bootstrap and Build
+      env:
+        # Force the worker to build via g++-13 
+        CC: gcc-13
+        CXX: g++-13
+      run: |
+        # 1. Replicate directory architecture
+        mkdir -p ~/.cnpm/cpp_modules
+        mkdir -p cpp_modules
+        
+        # 2. Replicate bootstrap symlinking rules
+        echo "Cloning and linking dependencies..."
+        git clone https://github.com ~/.cnpm/cpp_modules/urlcpp
+        ln -s ~/.cnpm/cpp_modules/urlcpp cpp_modules/urlcpp
+        
+        git clone https://github.com ~/.cnpm/cpp_modules/CLI11
+        ln -s ~/.cnpm/cpp_modules/CLI11 cpp_modules/CLI11
+        
+        git clone https://github.com ~/.cnpm/cpp_modules/zlib
+        ln -s ~/.cnpm/cpp_modules/zlib cpp_modules/zlib
+        
+        git clone https://github.com ~/.cnpm/cpp_modules/json-thresher
+        ln -s ~/.cnpm/cpp_modules/json-thresher cpp_modules/json-thresher
+        
+        git clone https://github.com ~/.cnpm/cpp_modules/c-plus-plus-serializer
+        ln -s ~/.cnpm/cpp_modules/c-plus-plus-serializer cpp_modules/c-plus-plus-serializer
+
+        # 3. FIX: Add stdexec to the local builder space
+        echo "Cloning stdexec concurrent execution framework..."
+        git clone https://github.com ~/.cnpm/cpp_modules/stdexec
+        ln -s ~/.cnpm/cpp_modules/stdexec cpp_modules/stdexec
+        
+        # 4. Compile modules sequentially
+        echo "Building sub-modules..."
+        cd cpp_modules/urlcpp && make -f Makefile all && cd ../..
+        
+        cd cpp_modules/json-thresher
+        mkdir -p cpp_modules
+        git clone https://github.com cpp_modules/fmt
+        export MODULE_DIRECTORY=../
+        make -f Makefile all
+        cd ../..
+        
+        # 5. Compile the main application
+        echo "Compiling main cnpm binary layout..."
+        make -j$(nproc)
