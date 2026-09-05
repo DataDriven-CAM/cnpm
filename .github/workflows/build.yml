@@ -70,6 +70,8 @@ jobs:
         export MODULE_DIRECTORY=../
         cd cpp_modules/urlcpp && make -f Makefile all && cd ../..
         
+        cd cpp_modules/fmt && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=TRuE -DCMAKE_INSTALL_PREFIX=../dist .. && make install && cd ../..
+
         cd cpp_modules/json-thresher
         mkdir -p cpp_modules
         git clone https://github.com/fmtlib/fmt.git cpp_modules/fmt
