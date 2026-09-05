@@ -59,7 +59,7 @@ jobs:
 
     - name: Debug Runner Directory Layout
       run: |
-        echo "=== Current Workspace ==="
+        echo "=== Current Workspace ===="
         pwd
         ls -la
         echo "=== Local cpp_modules Layout ==="
