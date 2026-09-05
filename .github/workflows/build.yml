@@ -32,23 +32,23 @@ jobs:
         # 2. Replicate bootstrap symlinking rules
         echo "Cloning and linking dependencies..."
         git clone https://github.com/rimmartin/urlcpp.git ~/.cnpm/cpp_modules/urlcpp
-        ln -s ~/.cnpm/cpp_modules/urlcpp cpp_modules/urlcpp
+        ln -sf ~/.cnpm/cpp_modules/urlcpp cpp_modules/urlcpp
         
         git clone https://github.com/CLIUtils/CLI11.git ~/.cnpm/cpp_modules/CLI11
-        ln -s ~/.cnpm/cpp_modules/CLI11 cpp_modules/CLI11
+        ln -sf ~/.cnpm/cpp_modules/CLI11 cpp_modules/CLI11
         
         git clone https://github.com/madler/zlib.git ~/.cnpm/cpp_modules/zlib
-        ln -s ~/.cnpm/cpp_modules/zlib cpp_modules/zlib
+        ln -sf ~/.cnpm/cpp_modules/zlib cpp_modules/zlib
         
         git clone https://github.com/DataDriven-CAM/json-thresher.git ~/.cnpm/cpp_modules/json-thresher
-        ln -s ~/.cnpm/cpp_modules/json-thresher cpp_modules/json-thresher
+        ln -sf ~/.cnpm/cpp_modules/json-thresher cpp_modules/json-thresher
         
         git clone https://github.com/goblinhack/c-plus-plus-serializer.git ~/.cnpm/cpp_modules/c-plus-plus-serializer
-        ln -s ~/.cnpm/cpp_modules/c-plus-plus-serializer cpp_modules/c-plus-plus-serializer
+        ln -sf ~/.cnpm/cpp_modules/c-plus-plus-serializer cpp_modules/c-plus-plus-serializer
 
         echo "Cloning stdexec concurrent execution framework..."
         git clone https://github.com/nvidia/stdexec.git ~/.cnpm/cpp_modules/stdexec
-        ln -s ~/.cnpm/cpp_modules/stdexec cpp_modules/stdexec
+        ln -sf ~/.cnpm/cpp_modules/stdexec cpp_modules/stdexec
         
         # 4. Compile modules sequentially
         echo "Building sub-modules..."
