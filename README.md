@@ -1,3 +1,4 @@
+[![Build Status](https://github.com/DataDriven-CAM/cnpm/actions/workflows/build.yml/badge.svg)](https://github.com/DataDriven-CAM/cnpm/actions/workflows/build.yml)
 # cnpm
 c++ package manager
 
