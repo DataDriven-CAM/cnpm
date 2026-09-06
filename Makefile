@@ -7,8 +7,8 @@ ifeq ($(OS),Windows_NT)
   wincxx=-DSYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE=2 -Ic:\msys64\mingw64\x86_64-w64-mingw32\include 
 endif
 
-LDFLAGS=-Wl,-rpath,"$$ORIGIN/cpp_modules/urlcpp" -Wl,-rpath,"/home/roger/Software/gcc-dev/dist/lib64" -L./cpp_modules/stdexec -L./cpp_modules/urlcpp -Lcpp_modules/zlib/dist/lib -l$(libprefix)urlcpp -l$(libprefix)z
-LDLIBS=./cpp_modules/json-thresher/libjsonthresher.a 
+LDFLAGS=-Wl,-rpath,"$$ORIGIN/cpp_modules/urlcpp" -Wl,-rpath,"/home/roger/Software/gcc-dev/dist/lib64" -L./cpp_modules/stdexec -Lcpp_modules/zlib/dist/lib -l$(libprefix)z
+LDLIBS=./cpp_modules/urlcpp/liburlcpp.a  ./cpp_modules/json-thresher/libjsonthresher.a 
 ifeq ($(OS),Windows_NT)
 LDFLAGS+= C:/Windows/System32/ws2_32.dll
 endif
