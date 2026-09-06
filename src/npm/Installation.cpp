@@ -20,7 +20,7 @@
 #include "npm/async/SubprocessSpawner.h"
 #include "npm/schedules/NpmRegistry.h"
 #include "npm/schedules/Repository.h"
-#include "npm/SymanticVersioning.h"
+#include "npm/utils/SemanticVersioning.h"
 
 
 namespace sylvanmats::npm{
@@ -39,7 +39,7 @@ namespace sylvanmats::npm{
             if(index!=std::string::npos){
                 std::string_view key{packageName.substr(index+1, packageName.length()-index)};
                 std::string_view val{packageName};
-                relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "", "", "", "", true, type.front().label.starts_with("dev")});
+                relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "", "", "", "", "", true, type.front().label.starts_with("dev")});
                 relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
                 traverse(key, val);
             }
@@ -70,24 +70,24 @@ namespace sylvanmats::npm{
                 auto&& [scope, moduleName]=parseModuleName(key);
                 std::filesystem::path localLinkPath=(!scope.empty()) ? std::filesystem::path(".")/moduleDirectory/scope/moduleName : std::filesystem::path(".")/moduleDirectory/moduleName;
                 if(!std::filesystem::exists(localLinkPath)){
-                    SymanticVersioning symanticVersioning;
+                    sylvanmats::npm::utils::SemanticVersioning semanticVersioning;
                 std::cout<<"localLinkPath "<<localLinkPath<<" "<<std::filesystem::exists(localLinkPath)<<" "<<val<<std::endl;
-                    if(symanticVersioning(val, [&](std::string_view base, std::string_view wildcard){
+                    if(semanticVersioning(val, [&](std::string_view base, std::string_view branch, std::string_view wildcard){
                         // std::cout << val << " version " << base<< " "<< wildcard << '\n';
                         std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
-                            relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "", scope, moduleName, std::string(wildcard), std::filesystem::exists(localPath), type.front().label.starts_with("dev")});
+                            relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, (!branch.empty())? "https://github.com/"+std::string(base): "", scope, std::string(moduleName), std::string(branch), std::string(wildcard), std::filesystem::exists(localPath), type.front().label.starts_with("dev")});
                             relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
                         hitVersion=true;
                     })){}
                     else{
                         std::filesystem::path localPath= (!scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/scope/moduleName : std::filesystem::path(home)/".cnpm"/moduleDirectory/moduleName;
-                        relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "https://github.com/"+std::string(val)+".git", "", moduleName, "", std::filesystem::exists(localPath), type.front().label.starts_with("dev")});
+                        relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "https://github.com/"+std::string(val)+".git", "", moduleName, "", "", std::filesystem::exists(localPath), type.front().label.starts_with("dev")});
                         relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
                         hitVersion=std::filesystem::exists(localPath);
                     }
                 }
                 else{
-                    relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "", "", "", "", true, type.front().label.starts_with("dev")});
+                    relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "", "", "", "", "", true, type.front().label.starts_with("dev")});
                     relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
                     hitVersion=true;
                 }
@@ -167,8 +167,8 @@ namespace sylvanmats::npm{
     //             std::filesystem::path localLinkPath=(!scope.empty())? "./"+moduleDirectory+"/"+scope+"/"+moduleName : "./"+moduleDirectory+"/"+moduleName;
     //             if(!std::filesystem::exists(localLinkPath)){
     //                 if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
-    //                 SymanticVersioning symanticVersioning;
-    //                 symanticVersioning(val, [&](std::string_view base, std::string_view wildcard){
+    //                 SemanticVersioning semanticVersioning;
+    //                 semanticVersioning(val, [&](std::string_view base,std::string_view base, std::string_view wildcard){
     //                     std::cout << val << " version " << base<< " "<< wildcard << '\n';
     //                     std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
     //                     if(std::filesystem::exists(localPath)){
@@ -347,8 +347,7 @@ namespace sylvanmats::npm{
     }
 
     void Installation::recurseModules(std::filesystem::path localLinkPath){
-        std::cout<<"recurseModules "<<localLinkPath<<" "<<depth<<std::endl;
-         if(depth<2)
+         if(depth<3)
             for(auto& p: std::filesystem::directory_iterator(localLinkPath)){
                 if(p.path().filename().compare("package.json")==0 && std::filesystem::exists(p.path())){
                     //std::cout<<depth<<" "<<p.path()<<std::endl;

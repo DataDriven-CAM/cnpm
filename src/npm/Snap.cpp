@@ -2,7 +2,7 @@
 #include <fstream>
 
 #include "npm/Snap.h"
-#include "npm/SymanticVersioning.h"
+#include "npm/utils/SemanticVersioning.h"
 
 #include "Url.h"
 
@@ -67,8 +67,8 @@ namespace sylvanmats::npm{
             std::string dependencySourceType={"nil"};
             if(depUrl.host().empty()){
                 auto&& [scope, moduleName]=parseModuleName(key);
-                    SymanticVersioning symanticVersioning;
-                    symanticVersioning(value, [&](std::string_view base, std::string_view wildcard){
+                    sylvanmats::npm::utils::SemanticVersioning semanticVersioning;
+                    semanticVersioning(value, [&](std::string_view base, std::string_view branch, std::string_view wildcard){
                         std::cout << value << " version " << base<< " "<< wildcard << '\n';
 //                        std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
                             std::string uri =(!scope.empty()) ? "https://registry.npmjs.org/@"+scope+"/"+moduleName+"/-/"+moduleName+"-"+std::string(wildcard)+".tgz" : "https://registry.npmjs.org/"+moduleName+"/-/"+moduleName+"-"+std::string(wildcard)+".tgz";

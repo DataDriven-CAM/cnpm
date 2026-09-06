@@ -19,6 +19,7 @@ namespace sylvanmats::npm::graphs {
         std::string url;
         std::string scope;
         std::string module_name;
+        std::string branch;
         std::string wildcard;
         bool already_have_it=false;
         bool is_dev=false;
@@ -78,13 +79,7 @@ namespace sylvanmats::npm::graphs {
             std::vector<size_t> enqueueMissingDependencies(){
                 std::vector<size_t> missing;
                 for(auto& v : vertices){
-                    std::cout<<"v.already_have_it "<<v.already_have_it<<" "<<v.name<<std::endl;
                     if(!v.already_have_it){
-                        // for(auto& e : edges){
-                        //     if(vertices[std::get<0>(e)].source.compare(v.name)==0){
-                        //         std::cout<<"missing dependency "<<e.target<<std::endl;
-                        //     }
-                        // }
                         missing.push_back(std::distance(vertices.begin(), std::find_if(vertices.begin(), vertices.end(), [&v](const project_properties& p){return p.name == v.name;})));
                     }
                 }

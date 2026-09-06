@@ -75,7 +75,6 @@ int main(int argc, char** argv, char **envp) {
         CLI11_PARSE(app, argc, argv);
 
         std::string moduleDirectory=(app.count("module-directory"))? app.get_option("module-directory")->as<std::string>(): "cpp_modules";
-        std::cout<<"moduleDirectory "<<moduleDirectory<<std::endl;
         size_t timeout=(app.count("timeout"))? app.get_option("timeout")->as<size_t>(): 240;
         username=(app.got_subcommand("security") && security.count("username"))? security.get_option("username")->as<std::string>(): "anonymous";
         passphrase=(app.got_subcommand("security") && security.count("passphrase"))? security.get_option("passphrase")->as<std::string>(): "";
@@ -206,7 +205,7 @@ int main(int argc, char** argv, char **envp) {
             jpName["name"];
             jsonBinder(jpName, [&relationalGraph](std::any& v){
                 if(v.type() == typeid(std::string_view)){
-                    relationalGraph(sylvanmats::npm::graphs::project_properties{std::any_cast<std::string_view>(v), std::string{}, "", "", "", "", true, false});
+                    relationalGraph(sylvanmats::npm::graphs::project_properties{std::any_cast<std::string_view>(v), std::string{}, "", "", "", "", "", true, false});
                 }
             });
             sylvanmats::io::json::Path jp;

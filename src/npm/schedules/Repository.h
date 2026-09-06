@@ -52,13 +52,17 @@ namespace sylvanmats::npm::schedules{
                 }
                 else {
                     args.push_back("clone");
+                    if(!prop.branch.empty()){
+                        args.push_back("-b");
+                        args.push_back(prop.branch);
+                    }
                     args.push_back("--depth");
                     args.push_back("1");
                     args.push_back("--no-tags");
                     args.push_back(prop.url);
                     args.push_back(localPath.string());
                     command = "git";
-                } 
+                }
                 if (command.empty()) {
                     std::cerr << "\n[ERROR] Unsupported protocol URI: " << prop.url << "\n";
                     throw std::runtime_error("Invalid protocol");

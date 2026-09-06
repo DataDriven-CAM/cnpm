@@ -10,7 +10,7 @@
 #include <ranges>
 #include <algorithm>
 
-#include "npm/SymanticVersioning.h"
+#include "npm/utils/SemanticVersioning.h"
 #include "npm/WebGetter.h"
 
 
@@ -35,8 +35,8 @@ namespace sylvanmats::npm{
             bool hitVersion=false;
             if(url.host().empty()){
                 std::string moduleName{key};
-                SymanticVersioning symanticVersioning(true);
-                symanticVersioning(val, [&moduleName, &hitVersion, &currentPackageName](std::string_view base, std::string_view wildcard){
+                sylvanmats::npm::utils::SemanticVersioning semanticVersioning(true);
+                semanticVersioning(val, [&moduleName, &hitVersion, &currentPackageName](std::string_view base, std::string_view branch, std::string_view wildcard){
                     if(base.compare(wildcard)==0)return;
                     // sylvanmats::reading::WebGetter webGetter;
                     std::string uri = "https://registry.npmjs.org/"+moduleName+"/"+std::string(wildcard);

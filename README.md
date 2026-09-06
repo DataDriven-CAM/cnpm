@@ -15,7 +15,7 @@ When all dependencies are installed cnpm will call on winnow to autonomously mai
 Coming with winnow is winnow-ui for a web based front end at first displaying what winnow is doing. 
 
 ## Start
-Need gcc 17.2.0 or later.  For windows  (Rev5, Built by MSYS2 project) 11.2.0
+Need gcc 17.0.0 or later.  For windows  (Rev5, Built by MSYS2 project) xx.0.0
 
 ```
 bootstrap.sh
