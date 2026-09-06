@@ -68,7 +68,7 @@ jobs:
         # 4. Compile modules sequentially
         echo "Building sub-modules..."
         export MODULE_DIRECTORY=../
-        cd cpp_modules/urlcpp && make -f Makefile all && cd ../..
+        cd cpp_modules/urlcpp && make CXX=g++-14 CC=gcc-14 -f Makefile all && cd ../..
         
         cd cpp_modules/fmt && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=TRuE -DFMT_TEST=OFF -DFMT_DOC=OFF -DCMAKE_INSTALL_PREFIX=../dist .. && make -j $(nproc) && make install && cd ../../..
 
