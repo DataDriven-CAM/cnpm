@@ -9,3 +9,6 @@ build/src/semantic_test.o: CXXFLAGS= -DNDEBUG $(OPT_FLAGS) -pthread -std=c++26 -
 build/src/semantic_test.o: src/semantic_test.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/semantic_test.o src/semantic_test.cpp 
+
+clean:
+	rm -rf build
