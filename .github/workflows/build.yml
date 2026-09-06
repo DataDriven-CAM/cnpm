@@ -82,3 +82,19 @@ jobs:
         # 5. Compile the main application
         echo "Compiling main cnpm binary layout..."
         make -j$(nproc)
+
+        # 6. ENHANCEMENT: Compile and execute the doctest unit test suite
+        echo "============================================="
+        echo "   Kicking off Doctest Regression Suite      "
+        echo "============================================="
+        
+        # Navigate to your isolated test folder mapping
+        cd test
+        
+        # Force the test Makefile to use the runner's aligned GCC 14 environment
+        make CXX=g++-14 CC=gcc-14 clean
+        make CXX=g++-14 CC=gcc-14 -j$(nproc)
+        
+        # Execute the generated test binary natively on the cloud container
+        # This will fail the GitHub Action run if any CHECK or REQUIRE fails!
+        ./test
