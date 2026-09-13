@@ -201,7 +201,8 @@ int main(int argc, char** argv, char **envp) {
 
         if(install || install_test || updateit){
             sylvanmats::npm::graphs::Relational relationalGraph;
-            sylvanmats::io::json::Path monorepoWorkspaces("workspaces/*");
+            sylvanmats::io::json::Path monorepoWorkspaces;//="workspaces/*"_jp;
+            monorepoWorkspaces["workspaces"]["*"];
             std::vector<std::string_view> workspaces;
             jsonBinder(monorepoWorkspaces, [&workspaces](const sylvanmats::io::json::JsonValue& v){
                 if(auto pVal = std::get_if<std::string_view>(&v)) {
@@ -235,7 +236,7 @@ int main(int argc, char** argv, char **envp) {
                     // installation(jsonBinder);
                 }
             }
-            {
+            else {
                 sylvanmats::io::json::Path jpName;
                 jpName["name"];
                 jsonBinder(jpName, [&relationalGraph](const sylvanmats::io::json::JsonValue& v){
