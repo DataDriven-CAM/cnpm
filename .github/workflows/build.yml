@@ -107,12 +107,27 @@ jobs:
         ./test
         cd ..
 
-    - name: Push Transport Image
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Prepare Dockerfile Context
       run: |
         cat <<EOF > Dockerfile
         FROM scratch
         COPY cnpm /usr/local/bin/cnpm
         EOF
-        
-        docker build -t ghcr.io/datadriven-cam/cnpm:latest .
-        docker push ghcr.io/datadriven-cam/cnpm:latest
+
+    - name: Build and Push to GHCR
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ghcr.io/datadriven-cam/cnpm:latest
