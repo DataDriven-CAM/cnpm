@@ -25,9 +25,9 @@ jobs:
 
     - name: Bootstrap and Build
       env:
-        # Force the worker to build via g++-14 
-        CC: gcc-14
-        CXX: g++-14
+        # Force the worker to build via g++-16 
+        CC: gcc-16
+        CXX: g++-16
       run: |
         # 1. Replicate directory architecture
         mkdir -p ~/.cnpm/cpp_modules
@@ -72,7 +72,7 @@ jobs:
         # 4. Compile modules sequentially
         echo "Building sub-modules..."
         export MODULE_DIRECTORY=../
-        cd cpp_modules/urlcpp && make CXX=g++-14 CC=gcc-14 -f Makefile all && cd ../..
+        cd cpp_modules/urlcpp && make CXX=g++-16 CC=gcc-16 -f Makefile all && cd ../..
         
         cd cpp_modules/fmt && mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=TRuE -DFMT_TEST=OFF -DFMT_DOC=OFF -DCMAKE_INSTALL_PREFIX=../dist .. && make -j $(nproc) && make install && cd ../../..
 
@@ -95,9 +95,9 @@ jobs:
         # Navigate to your isolated test folder mapping
         cd test
         
-        # Force the test Makefile to use the runner's aligned GCC 14 environment
-        make CXX=g++-14 CC=gcc-14 clean
-        make CXX=g++-14 CC=gcc-14 -j$(nproc)
+        # Force the test Makefile to use the runner's aligned GCC 16 environment
+        make CXX=g++-16 CC=gcc-16 clean
+        make CXX=g++-16 CC=gcc-16 -j$(nproc)
         
         # Execute the generated test binary natively on the cloud container
         # This will fail the GitHub Action run if any CHECK or REQUIRE fails!
