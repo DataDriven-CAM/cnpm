@@ -81,6 +81,8 @@ jobs:
         git clone https://github.com/fmtlib/fmt.git cpp_modules/fmt
         export MODULE_DIRECTORY=../
         make -f Makefile all
+        pwd
+        ls -lastr
         cd ../..
         
         # 5. Compile the main application
