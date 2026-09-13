@@ -208,6 +208,10 @@ int main(int argc, char** argv, char **envp) {
                     workspaces.push_back(*pVal);
                 }
             });
+            std::cout<<"workspaces: "<<std::endl;
+            for(auto& w : workspaces){
+                std::cout<<"\t"<<w<<std::endl;
+            }
             if(workspaces.size()>0){
                 std::cout<<"workspaces: "<<std::endl;
                 for(auto& w : workspaces){
@@ -231,22 +235,24 @@ int main(int argc, char** argv, char **envp) {
                     // installation(jsonBinder);
                 }
             }
-            else{
-            sylvanmats::io::json::Path jpName;
-            jpName["name"];
-            jsonBinder(jpName, [&relationalGraph](const sylvanmats::io::json::JsonValue& v){
-                if(auto pVal = std::get_if<std::string_view>(&v)) {
-                    relationalGraph(sylvanmats::npm::graphs::project_properties{*pVal, std::string{}, "", "", "", "", "", true, false});
-                }
-            });
-            sylvanmats::io::json::Path jp;
-            jp["dependencies"];
-            sylvanmats::npm::Installation installation(sslCertificationLocation, moduleDirectory, timeout, jp, relationalGraph);
-            installation(jsonBinder);
-            // sylvanmats::io::json::Path jp2;
-            // jp2["devDependencies"];
-            // sylvanmats::npm::Installation installation2(sslCertificationLocation, moduleDirectory, timeout, jp2, relationalGraph);
-            // installation2(jsonBinder);
+            {
+                sylvanmats::io::json::Path jpName;
+                jpName["name"];
+                jsonBinder(jpName, [&relationalGraph](const sylvanmats::io::json::JsonValue& v){
+                    if(auto pVal = std::get_if<std::string_view>(&v)) {
+                        std::cout<<"\tname? "<<*pVal<<std::endl;
+                        relationalGraph(sylvanmats::npm::graphs::project_properties{*pVal, std::string{}, "", "", "", "", "", true, false});
+                    }
+                });
+                sylvanmats::io::json::Path jp;
+                jp["dependencies"];
+                std::cout<<"jp dependencies"<<jp<<std::endl;
+                sylvanmats::npm::Installation installation(sslCertificationLocation, moduleDirectory, timeout, jp, relationalGraph);
+                installation(jsonBinder);
+                // sylvanmats::io::json::Path jp2;
+                // jp2["devDependencies"];
+                // sylvanmats::npm::Installation installation2(sslCertificationLocation, moduleDirectory, timeout, jp2, relationalGraph);
+                // installation2(jsonBinder);
             }
             std::ofstream o("relationalGraph.json");
             o<<relationalGraph;
