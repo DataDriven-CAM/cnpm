@@ -23,11 +23,11 @@ namespace sylvanmats::npm{
         sylvanmats::io::json::Path jpName;
         jpName["name"];
         std::string_view currentPackageName;
-        jb(jpName, [&currentPackageName](std::any& v){
+        jb(jpName, [&currentPackageName](const sylvanmats::io::json::JsonValue& v){
             currentPackageName=std::any_cast<std::string_view>(v);
         });
         std::cout<<" currentPackageName "<<currentPackageName<<std::endl;
-        jb(type, [&](std::string_view& key, std::any& v){
+        jb(type, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
             std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<std::endl;//<<" "<<v.type().name()
             std::string_view val{std::any_cast<std::string_view>(v)};
             url::Url url(std::string{val});
@@ -48,7 +48,7 @@ namespace sylvanmats::npm{
                     //     jsonBinder(is);
                     //     sylvanmats::io::json::Path jp;
                     //     jp["version"];
-                    //     jsonBinder(jp, [&](std::any& v){
+                    //     jsonBinder(jp, [&](const sylvanmats::io::json::JsonValue& v){
                     //       std::cout<<moduleName<<" "<<base<<" "<<std::any_cast<std::string_view>(v)<<" "<<currentPackageName<<std::endl;  
                     //     });
                     //     //std::cout<<jsonBinder<<std::endl;

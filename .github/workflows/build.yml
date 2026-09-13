@@ -9,7 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
-
+    permissions:
+      contents: read
+      packages: write # <-- Required to push to GHCR
+      
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4

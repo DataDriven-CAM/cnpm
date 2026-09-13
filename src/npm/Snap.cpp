@@ -20,32 +20,32 @@ namespace sylvanmats::npm{
         sylvanmats::io::json::Path jpName;
         jpName["name"];
         std::string_view name;
-        jsonBinder(jpName, [&name](std::any& v){
+        jsonBinder(jpName, [&name](const sylvanmats::io::json::JsonValue& v){
             name=std::any_cast<std::string_view>(v);
         });
         sylvanmats::io::json::Path jpVersion;
         jpVersion["version"];
         std::string_view version;
-        jsonBinder(jpVersion, [&version](std::any& v){
+        jsonBinder(jpVersion, [&version](const sylvanmats::io::json::JsonValue& v){
             version=std::any_cast<std::string_view>(v);
         });
         sylvanmats::io::json::Path jpSummary;
         jpSummary["description"];
         std::string_view summary;
-        jsonBinder(jpSummary, [&summary](std::any& v){
+        jsonBinder(jpSummary, [&summary](const sylvanmats::io::json::JsonValue& v){
             summary=std::any_cast<std::string_view>(v);
         });
         sylvanmats::io::json::Path jpUrl;
         jpUrl["repository"];
         std::string_view url;
-        jsonBinder(jpUrl, [&url](std::any& v){
+        jsonBinder(jpUrl, [&url](const sylvanmats::io::json::JsonValue& v){
             url=std::any_cast<std::string_view>(v);
         });
         std::string plugin="make";
         std::string sourceType="git";
         sylvanmats::io::json::Path type;        
         type["dependencies"];
-        jsonBinder(type, [&](std::string_view& key, std::any& v){
+        jsonBinder(type, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
             std::string_view value=std::any_cast<std::string_view>(v);
             if(value.starts_with("hg+")){
                 if(value.starts_with("hg+https")){

@@ -48,13 +48,15 @@ namespace sylvanmats::npm{
     
     void Installation::operator()(sylvanmats::io::json::Binder& jb){
 
-        jb(type, [&](std::string_view& key, std::any& v){
-            std::string_view val{std::any_cast<std::string_view>(v)};
-            traverse(key, val);
+        jb(type, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
+            if(auto pVal = std::get_if<std::string_view>(&v)) {
+                std::string_view val{*pVal};
+                traverse(key, val);
+            }
         });
         std::vector<size_t>&& missing=relationalGraph.enqueueMissingDependencies();
         install(missing);
-//         jb(type, [&](std::string_view& key, std::any& v){
+//         jb(type, [&](std::string_view& key, const sylvanmats::io::json::JsonValue& v){
 // //            if(key.compare("axios")==0)std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
 //             std::string_view val{std::any_cast<std::string_view>(v)};
 //             install(key, val);
@@ -355,9 +357,11 @@ namespace sylvanmats::npm{
                     std::ifstream is(p.path());
                     jsonBinder(is);
                     depth++;
-                    jsonBinder(type, [&](std::string_view& key, std::any& v){
-                        std::string_view val{std::any_cast<std::string_view>(v)};
-                        traverse(key, val);
+                    jsonBinder(type, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
+                        if(auto pVal = std::get_if<std::string_view>(&v)) {
+                            std::string_view val{*pVal};
+                            traverse(key, val);
+                        }
                     });
                     // this->operator()(jsonBinder);
                     // linkAnyBinaries(jsonBinder, localLinkPath);
@@ -374,14 +378,16 @@ namespace sylvanmats::npm{
             if(!std::filesystem::exists(binPath))std::filesystem::create_directories(binPath);
             sylvanmats::io::json::Path jp;
             jp["bin"];
-            jb(jp, [&](std::string_view& key, std::any& v){
+            jb(jp, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
                 std::filesystem::path execLinkPath=binPath;
                 execLinkPath/=key;
                 std::filesystem::path execPath=localLinkPath;
-                execPath/=std::any_cast<std::string_view>(v);
+                if(auto pVal = std::get_if<std::string_view>(&v)) {
+                execPath/=*pVal;
                 std::filesystem::path relExecPath=localLinkPath.lexically_relative(binPath);
-                relExecPath/=std::any_cast<std::string_view>(v);
+                relExecPath/=*pVal;
                 if(!std::filesystem::exists(execLinkPath) && std::filesystem::exists(execPath))std::filesystem::create_directory_symlink(relExecPath, execLinkPath);
+                }
             });
         }
     }

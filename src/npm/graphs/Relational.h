@@ -109,7 +109,8 @@ namespace sylvanmats::npm::graphs {
           "already_have_it": ")"<<(v.already_have_it ? "true" : "false")<<R"(",
           "user-defined": "values"
         }
-    })" << (&v != &rg.vertices.back() ? "," : "");
+    })" << (&v != &rg.vertices.back() ? "," : "")<<R"(
+)";
     }
     s<<R"(    },
     "edges": [
@@ -117,7 +118,7 @@ namespace sylvanmats::npm::graphs {
 )";
             for (const auto& e : rg.edges) {
                 s<<R"(      {
-      "source": ")"<<std::get<0>(e)<<R"(",
+        "source": ")"<<std::get<0>(e)<<R"(",
         "relation": "depends on",
         "target": ")"<<std::get<1>(e)<<R"("    }
 )"<<(&e != &rg.edges.back() ? "," : "");

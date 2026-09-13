@@ -35,7 +35,7 @@ parts:
     after: [my-gcc-toolchain, graph-v3]
     build-environment:
      - MODULE_DIRECTORY: "$SNAPCRAFT_STAGE"
-    override-build: |
+    override-build:
       export PATH="$SNAPCRAFT_PART_INSTALL/gcc-dev/dist/bin:$PATH"
       export CC="$SNAPCRAFT_PART_INSTALL/gcc-dev/dist/bin/gcc"
       export CXX="$SNAPCRAFT_PART_INSTALL/gcc-dev/dist/bin/g++"

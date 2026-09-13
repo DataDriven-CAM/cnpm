@@ -27,11 +27,11 @@ namespace sylvanmats::npm{
             unsigned int index=url.path().rfind('/');
             if(index!=std::string::npos){
                 bool tagExists=false;
-                jb(type, [&tagExists](std::any& v){tagExists=true;});
+                jb(type, [&tagExists](const sylvanmats::io::json::JsonValue& v){tagExists=true;});
                 if(!tagExists){
                     std::cout<<"not "<<type<<std::endl;
                     sylvanmats::io::json::Path jp;
-                    jb(jp, type.string(), sylvanmats::io::json::object());
+                    //@todo bring back modifying jb(jp, type.string(), sylvanmats::io::json::object());
                 }
                 return jb(type, packageName.substr(index+1, packageName.length()-index), packageName);
             }

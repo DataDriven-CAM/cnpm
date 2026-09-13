@@ -201,11 +201,42 @@ int main(int argc, char** argv, char **envp) {
 
         if(install || install_test || updateit){
             sylvanmats::npm::graphs::Relational relationalGraph;
+            sylvanmats::io::json::Path monorepoWorkspaces("workspaces/*");
+            std::vector<std::string_view> workspaces;
+            jsonBinder(monorepoWorkspaces, [&workspaces](const sylvanmats::io::json::JsonValue& v){
+                if(auto pVal = std::get_if<std::string_view>(&v)) {
+                    workspaces.push_back(*pVal);
+                }
+            });
+            if(workspaces.size()>0){
+                std::cout<<"workspaces: "<<std::endl;
+                for(auto& w : workspaces){
+                    std::cout<<"\t"<<w<<std::endl;
+                }
+                for(auto& w : workspaces){
+                    std::cout<<"installing workspace "<<w<<std::endl;
+                    sylvanmats::io::json::Path jp;
+                    jp["dependencies"];
+                    std::filesystem::path searchDirectory = packagePath.parent_path() / w;
+                    if (std::filesystem::exists(searchDirectory) && std::filesystem::is_directory(searchDirectory)) {
+                        for (const auto& entry : std::filesystem::recursive_directory_iterator(searchDirectory)) {
+                            std::cout << "\t\tSearching for workspace package: " << entry.path() << std::endl;
+                            if (entry.is_regular_file() && entry.path().filename() == "package.json") {
+                                std::cout << "\t\tWorkspace package found: " << entry.path().parent_path() << std::endl;
+                            }
+                        }
+                    }
+                    // sylvanmats::io::json::Binder jsonBinder;
+                    // sylvanmats::npm::Installation installation(sslCertificationLocation, moduleDirectory, timeout, jp, relationalGraph);
+                    // installation(jsonBinder);
+                }
+            }
+            else{
             sylvanmats::io::json::Path jpName;
             jpName["name"];
-            jsonBinder(jpName, [&relationalGraph](std::any& v){
-                if(v.type() == typeid(std::string_view)){
-                    relationalGraph(sylvanmats::npm::graphs::project_properties{std::any_cast<std::string_view>(v), std::string{}, "", "", "", "", "", true, false});
+            jsonBinder(jpName, [&relationalGraph](const sylvanmats::io::json::JsonValue& v){
+                if(auto pVal = std::get_if<std::string_view>(&v)) {
+                    relationalGraph(sylvanmats::npm::graphs::project_properties{*pVal, std::string{}, "", "", "", "", "", true, false});
                 }
             });
             sylvanmats::io::json::Path jp;
@@ -216,6 +247,7 @@ int main(int argc, char** argv, char **envp) {
             // jp2["devDependencies"];
             // sylvanmats::npm::Installation installation2(sslCertificationLocation, moduleDirectory, timeout, jp2, relationalGraph);
             // installation2(jsonBinder);
+            }
             std::ofstream o("relationalGraph.json");
             o<<relationalGraph;
             o.close();
@@ -223,13 +255,15 @@ int main(int argc, char** argv, char **envp) {
         if(test || install_test){
             sylvanmats::io::json::Path jp;
             jp["scripts"];
-            jsonBinder(jp, [](std::string_view& key, std::any& val){
+            jsonBinder(jp, [](std::string_view key, const sylvanmats::io::json::JsonValue& val){
                 if(key.compare("test")==0){
-                    std::string command{std::any_cast<std::string_view>(val)};
-                    replace(command, "\\\"", "\"");
-                    std::cout<<"\ttest : " << command << std::endl;
-                    int status=system(command.c_str());
-                    std::cout<<"\t"<<key << " : " << status << std::endl;
+                    if(auto pVal = std::get_if<std::string_view>(&val)) {
+                        std::string command{*pVal};
+                        replace(command, "\\\"", "\"");
+                        std::cout<<"\ttest : " << command << std::endl;
+                        int status=system(command.c_str());
+                        std::cout<<"\t"<<key << " : " << status << std::endl;
+                    }
                 }
             });
 
@@ -238,15 +272,17 @@ int main(int argc, char** argv, char **envp) {
             std::cout<<"pos scriptKeys: "<<o<<std::endl;
             sylvanmats::io::json::Path jp;
             jp["scripts"];
-            jsonBinder(jp, [&o](std::string_view& key, std::any& val){
+            jsonBinder(jp, [&o](std::string_view key, const sylvanmats::io::json::JsonValue& val){
                 if(o.compare(key)==0){
                     std::cout<<"o "<<o<<" "<<key<<std::endl;
-                    std::string command{std::any_cast<std::string_view>(val)};
-                    std::cout<<"\t"<<o << " : " << command << std::endl;
-                    replace(command, "\\\"", "\"");
-//                    std::cout<< "command : " << command << std::endl;
-                    int status=system(command.c_str());
-                    std::cout<<"\t"<<o << " : " << status << std::endl;
+                    if(auto pVal = std::get_if<std::string_view>(&val)) {
+                        std::string command{*pVal};
+                        std::cout<<"\t"<<o << " : " << command << std::endl;
+                        replace(command, "\\\"", "\"");
+    //                    std::cout<< "command : " << command << std::endl;
+                        int status=system(command.c_str());
+                        std::cout<<"\t"<<o << " : " << status << std::endl;
+                    }
                 }
             });
         }
