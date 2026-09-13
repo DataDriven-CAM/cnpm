@@ -18,11 +18,15 @@ namespace sylvanmats::npm::schedules{
     class NpmRegistry{
         private:
         std::string home;
-        std::string moduleDirectory;
+        std::string rootModuleDirectory;
         sylvanmats::npm::graphs::Relational& relationalGraph;
+        std::string moduleDirectory;
         public:
             NpmRegistry()= delete;
-            NpmRegistry(std::string home, std::string moduleDirectory, sylvanmats::npm::graphs::Relational& relationalGraph) : home(home), moduleDirectory(moduleDirectory), relationalGraph(relationalGraph){}
+            NpmRegistry(std::string home, std::string rootModuleDirectory, sylvanmats::npm::graphs::Relational& relationalGraph) : home(home), rootModuleDirectory(rootModuleDirectory), relationalGraph(relationalGraph){
+                size_t offset=rootModuleDirectory.find_last_of("/\\");
+                moduleDirectory=(offset!=std::string::npos) ? rootModuleDirectory.substr(offset+1, rootModuleDirectory.length()-offset-1) : rootModuleDirectory;
+            }
             NpmRegistry(NpmRegistry const&)= delete;
             NpmRegistry(NpmRegistry&&)= default;
             virtual ~NpmRegistry()= default;
@@ -41,7 +45,7 @@ namespace sylvanmats::npm::schedules{
                         url::Url url(prop.url);
                         std::string_view uriPath=url.path();
                         // auto&& [scope, moduleName]=parseModuleName(uriPath);
-                        std::filesystem::path localLinkPath=(!prop.scope.empty())? "./"+moduleDirectory+"/"+prop.scope+"/"+prop.module_name : "./"+moduleDirectory+"/"+prop.module_name;
+                        std::filesystem::path localLinkPath=(!prop.scope.empty())? rootModuleDirectory+"/"+prop.scope+"/"+prop.module_name : rootModuleDirectory+"/"+prop.module_name;
                         std::filesystem::path localPath= (!prop.scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/prop.scope/prop.module_name : std::filesystem::path(home)/".cnpm"/moduleDirectory/prop.module_name;
                             
                     std::string uri = (!prop.scope.empty()) 

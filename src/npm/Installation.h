@@ -18,18 +18,18 @@ namespace sylvanmats::npm{
 
     class Installation{
     protected:
-        std::string sslCertificationLocation;
-        std::string moduleDirectory;
+        std::string rootModuleDirectory;
         size_t timeout;
         sylvanmats::io::json::Path type;
         sylvanmats::npm::graphs::Relational& relationalGraph;
+        std::string moduleDirectory;
         std::string home;
         std::string cnpmHome;
         unsigned int depth=0;
         size_t current_source=0;
     public:
         Installation() = delete;
-        Installation(std::string& sslCertificationLocation, std::string& moduleDirectory, size_t timeout, sylvanmats::io::json::Path type, sylvanmats::npm::graphs::Relational& relationalGraph);
+        Installation(std::string& rootModuleDirectory, size_t timeout, sylvanmats::io::json::Path type, sylvanmats::npm::graphs::Relational& relationalGraph);
         Installation(const Installation& orig) =  delete;
         virtual ~Installation() = default;
     public:

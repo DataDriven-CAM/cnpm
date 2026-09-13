@@ -25,8 +25,10 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation(std::string& sslCertificationLocation, std::string& moduleDirectory, size_t timeout, sylvanmats::io::json::Path type, sylvanmats::npm::graphs::Relational& relationalGraph) : sslCertificationLocation (sslCertificationLocation), moduleDirectory (moduleDirectory), timeout (timeout), type (type), relationalGraph (relationalGraph),
+    Installation::Installation(std::string& rootModuleDirectory, size_t timeout, sylvanmats::io::json::Path type, sylvanmats::npm::graphs::Relational& relationalGraph) : rootModuleDirectory (rootModuleDirectory), timeout (timeout), type (type), relationalGraph (relationalGraph),
          home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
+            size_t offset=rootModuleDirectory.find_last_of("/\\");
+            moduleDirectory=(offset!=std::string::npos) ? rootModuleDirectory.substr(offset+1, rootModuleDirectory.length()-offset-1) : rootModuleDirectory;
     }
     
     void Installation::operator()(std::string& packageName){
@@ -70,10 +72,9 @@ namespace sylvanmats::npm{
             bool hitVersion=false;
             if(url.host().empty()){
                 auto&& [scope, moduleName]=parseModuleName(key);
-                std::filesystem::path localLinkPath=(!scope.empty()) ? std::filesystem::path(".")/moduleDirectory/scope/moduleName : std::filesystem::path(".")/moduleDirectory/moduleName;
+                std::filesystem::path localLinkPath=(!scope.empty()) ? std::filesystem::path(rootModuleDirectory) / scope / moduleName : std::filesystem::path(rootModuleDirectory) / moduleName;
                 if(!std::filesystem::exists(localLinkPath)){
                     sylvanmats::npm::utils::SemanticVersioning semanticVersioning;
-                std::cout<<"localLinkPath "<<localLinkPath<<" "<<std::filesystem::exists(localLinkPath)<<" "<<val<<std::endl;
                     if(semanticVersioning(val, [&](std::string_view base, std::string_view branch, std::string_view wildcard){
                         // std::cout << val << " version " << base<< " "<< wildcard << '\n';
                         std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
@@ -85,7 +86,9 @@ namespace sylvanmats::npm{
                         std::filesystem::path localPath= (!scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/scope/moduleName : std::filesystem::path(home)/".cnpm"/moduleDirectory/moduleName;
                         relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "https://github.com/"+std::string(val)+".git", "", moduleName, "", "", std::filesystem::exists(localPath), type.front().label.starts_with("dev")});
                         relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
-                        hitVersion=std::filesystem::exists(localPath);
+                        if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
+                        if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
+                        hitVersion=std::filesystem::exists(localPath) && std::filesystem::exists(localLinkPath);
                     }
                 }
                 else{
@@ -101,7 +104,7 @@ namespace sylvanmats::npm{
     void Installation::install(std::vector<size_t>& missingIndices){
         
         std::cout<<"install "<<missingIndices.size()<<std::endl;
-        sylvanmats::npm::schedules::NpmRegistry npmRegistry(home, moduleDirectory, relationalGraph);
+        sylvanmats::npm::schedules::NpmRegistry npmRegistry(home, rootModuleDirectory, relationalGraph);
         npmRegistry(missingIndices);
         std::vector<size_t> stillMissingIndices;
         stillMissingIndices.reserve(missingIndices.size()); 
@@ -115,7 +118,7 @@ namespace sylvanmats::npm{
     // Pass the filtered list to the Repository scheduler stage
         if (!stillMissingIndices.empty()) {
 
-            sylvanmats::npm::schedules::Repository repository(home, moduleDirectory, relationalGraph);
+            sylvanmats::npm::schedules::Repository repository(home, rootModuleDirectory, relationalGraph);
             repository(stillMissingIndices);
         }
 
@@ -373,7 +376,7 @@ namespace sylvanmats::npm{
     
     void Installation::linkAnyBinaries(sylvanmats::io::json::Binder& jb, std::filesystem::path& localLinkPath){
         if(std::filesystem::exists(localLinkPath)){
-            std::filesystem::path binPath="./"+moduleDirectory;
+            std::filesystem::path binPath=rootModuleDirectory;
             binPath/=".bin";
             if(!std::filesystem::exists(binPath))std::filesystem::create_directories(binPath);
             sylvanmats::io::json::Path jp;

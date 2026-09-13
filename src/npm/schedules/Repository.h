@@ -15,11 +15,15 @@ namespace sylvanmats::npm::schedules{
     class Repository{
         private:
         std::string home;
-        std::string moduleDirectory;
+        std::string rootModuleDirectory;
         sylvanmats::npm::graphs::Relational& relationalGraph;
+        std::string moduleDirectory;
         public:
             Repository()= delete;
-            Repository(std::string home, std::string moduleDirectory, sylvanmats::npm::graphs::Relational& relationalGraph) : home(home), moduleDirectory(moduleDirectory), relationalGraph(relationalGraph){}
+            Repository(std::string home, std::string rootModuleDirectory, sylvanmats::npm::graphs::Relational& relationalGraph) : home(home), rootModuleDirectory(rootModuleDirectory), relationalGraph(relationalGraph){
+                size_t offset=rootModuleDirectory.find_last_of("/\\");
+                moduleDirectory=(offset!=std::string::npos) ? rootModuleDirectory.substr(offset+1, rootModuleDirectory.length()-offset-1) : rootModuleDirectory;
+            }
             Repository(Repository const&)= delete;
             Repository(Repository&&)= default;
             virtual ~Repository()= default;
@@ -37,9 +41,8 @@ namespace sylvanmats::npm::schedules{
                         url::Url url(prop.url);
                         std::string_view uriPath=url.path();
                         // auto&& [scope, moduleName]=parseModuleName(uriPath);
-                        std::filesystem::path localLinkPath=(!prop.scope.empty())? "./"+moduleDirectory+"/"+prop.scope+"/"+prop.module_name : "./"+moduleDirectory+"/"+prop.module_name;
+                        std::filesystem::path localLinkPath=(!prop.scope.empty())? rootModuleDirectory+"/"+prop.scope+"/"+prop.module_name : rootModuleDirectory+"/"+prop.module_name;
                         std::filesystem::path localPath= (!prop.scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/prop.scope/prop.module_name : std::filesystem::path(home)/".cnpm"/moduleDirectory/prop.module_name;
-                        
                         std::string command;
                         std::vector<std::string> args;
                         // std::cout<<"prop.url "<<prop.url<<" "<<prop.wildcard<<std::endl;
