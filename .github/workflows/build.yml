@@ -105,3 +105,14 @@ jobs:
         # Execute the generated test binary natively on the cloud container
         # This will fail the GitHub Action run if any CHECK or REQUIRE fails!
         ./test
+        cd ..
+
+      - name: Push Transport Image
+        run: |
+          cat <<EOF > Dockerfile
+          FROM scratch
+          COPY cnpm /usr/local/bin/cnpm
+          EOF
+          
+          docker build -t ghcr.io/datadriven-cam/cnpm:latest .
+          docker push ghcr.io/datadriven-cam/cnpm:latest
