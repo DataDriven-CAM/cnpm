@@ -25,7 +25,7 @@
 
 namespace sylvanmats::npm{
     
-    Installation::Installation(std::string& rootModuleDirectory, size_t timeout, sylvanmats::io::json::Path type, sylvanmats::npm::graphs::Relational& relationalGraph) : rootModuleDirectory (rootModuleDirectory), timeout (timeout), type (type), relationalGraph (relationalGraph),
+    Installation::Installation(std::string& rootModuleDirectory, size_t timeout, sylvanmats::npm::graphs::Relational& relationalGraph) : rootModuleDirectory (rootModuleDirectory), timeout (timeout), relationalGraph (relationalGraph),
          home ((std::getenv("HOME")!=nullptr) ?std::getenv("HOME") : "c:/Users/Roger"), cnpmHome ((std::getenv("CNPM_HOME")!=nullptr) ?std::getenv("CNPM_HOME") : ".") {
             size_t offset=rootModuleDirectory.find_last_of("/\\");
             moduleDirectory=(offset!=std::string::npos) ? rootModuleDirectory.substr(offset+1, rootModuleDirectory.length()-offset-1) : rootModuleDirectory;
@@ -41,31 +41,41 @@ namespace sylvanmats::npm{
             if(index!=std::string::npos){
                 std::string_view key{packageName.substr(index+1, packageName.length()-index)};
                 std::string_view val{packageName};
-                relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "", "", "", "", "", true, type.front().label.starts_with("dev")});
+                relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "", "", "", "", "", true, false});
                 relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
-                traverse(key, val);
+                sylvanmats::io::json::Path type;
+                type["dependencies"];
+                traverse(type, key, val);
+                sylvanmats::io::json::Path devType;
+                devType["devDependencies"];
+                traverse(devType, key, val);
+
             }
         }
     }
     
     void Installation::operator()(sylvanmats::io::json::Binder& jb){
-
+        sylvanmats::io::json::Path type;
+        type["dependencies"];
         jb(type, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
             if(auto pVal = std::get_if<std::string_view>(&v)) {
                 std::string_view val{*pVal};
-                traverse(key, val);
+                traverse(type, key, val);
+            }
+        });
+        sylvanmats::io::json::Path devType;
+        devType["devDependencies"];
+        jb(devType, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
+            if(auto pVal = std::get_if<std::string_view>(&v)) {
+                std::string_view val{*pVal};
+                traverse(devType, key, val);
             }
         });
         std::vector<size_t>&& missing=relationalGraph.enqueueMissingDependencies();
         install(missing);
-//         jb(type, [&](std::string_view& key, const sylvanmats::io::json::JsonValue& v){
-// //            if(key.compare("axios")==0)std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<" "<<v.type().name()<<std::endl;
-//             std::string_view val{std::any_cast<std::string_view>(v)};
-//             install(key, val);
-//         });
     }
     
-    void Installation::traverse(std::string_view& key, std::string_view& val){
+    void Installation::traverse(sylvanmats::io::json::Path& type, std::string_view& key, std::string_view& val){
             if(depth>=2)return;
             url::Url url(std::string{val});
         //    std::cout<<val<<"\t"<<url.has_scheme()<<" "<<url.host().empty()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
@@ -360,10 +370,20 @@ namespace sylvanmats::npm{
                     std::ifstream is(p.path());
                     jsonBinder(is);
                     depth++;
+                    sylvanmats::io::json::Path type;
+                    type["dependencies"];
                     jsonBinder(type, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
                         if(auto pVal = std::get_if<std::string_view>(&v)) {
                             std::string_view val{*pVal};
-                            traverse(key, val);
+                            traverse(type, key, val);
+                        }
+                    });
+                    sylvanmats::io::json::Path devType;
+                    devType["devDependencies"];
+                    jsonBinder(devType, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
+                        if(auto pVal = std::get_if<std::string_view>(&v)) {
+                            std::string_view val{*pVal};
+                            traverse(devType, key, val);
                         }
                     });
                     // this->operator()(jsonBinder);

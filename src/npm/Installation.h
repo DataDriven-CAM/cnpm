@@ -20,7 +20,6 @@ namespace sylvanmats::npm{
     protected:
         std::string rootModuleDirectory;
         size_t timeout;
-        sylvanmats::io::json::Path type;
         sylvanmats::npm::graphs::Relational& relationalGraph;
         std::string moduleDirectory;
         std::string home;
@@ -29,15 +28,15 @@ namespace sylvanmats::npm{
         size_t current_source=0;
     public:
         Installation() = delete;
-        Installation(std::string& rootModuleDirectory, size_t timeout, sylvanmats::io::json::Path type, sylvanmats::npm::graphs::Relational& relationalGraph);
+        Installation(std::string& rootModuleDirectory, size_t timeout, sylvanmats::npm::graphs::Relational& relationalGraph);
         Installation(const Installation& orig) =  delete;
         virtual ~Installation() = default;
     public:
         void operator()(std::string& packageName);
         void operator()(sylvanmats::io::json::Binder& jb);
     protected:
-        void traverse(std::string_view& key, std::string_view& val);
-        void install(std::vector<size_t>& missing);
+        void traverse(sylvanmats::io::json::Path& type, std::string_view& key, std::string_view& val);
+        void install(std::vector<size_t>& missingIndices);
         void recurseModules(std::filesystem::path localLinkPath);
         void linkAnyBinaries(sylvanmats::io::json::Binder& jb, std::filesystem::path& localLinkPath);
         void emitUniversalHeartbeat();

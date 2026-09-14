@@ -279,15 +279,8 @@ int main(int argc, char** argv, char **envp) {
                         relationalGraph(sylvanmats::npm::graphs::project_properties{*pVal, std::string{}, "", "", "", "", "", true, false});
                     }
                 });
-                sylvanmats::io::json::Path jp;
-                jp["dependencies"];
-                std::cout<<"jp dependencies"<<jp<<std::endl;
-                sylvanmats::npm::Installation installation(moduleStrPath, timeout, jp, relationalGraph);
+                sylvanmats::npm::Installation installation(moduleStrPath, timeout, relationalGraph);
                 installation(jsonBinder);
-                // sylvanmats::io::json::Path jp2;
-                // jp2["devDependencies"];
-                // sylvanmats::npm::Installation installation2(moduleStrPath, timeout, jp2, relationalGraph);
-                // installation2(jsonBinder);
             std::ofstream o("relationalGraph.json");
             o<<relationalGraph;
             o.close();
