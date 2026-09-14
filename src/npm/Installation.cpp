@@ -90,7 +90,7 @@ namespace sylvanmats::npm{
                         std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
                             relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, (!branch.empty())? "https://github.com/"+std::string(base): "", scope, std::string(moduleName), std::string(branch), std::string(wildcard), std::filesystem::exists(localPath), type.front().label.starts_with("dev")});
                             relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
-                        hitVersion=true;
+                        hitVersion=std::filesystem::exists(localPath) && std::filesystem::exists(localLinkPath);
                     })){}
                     else{
                         std::filesystem::path localPath= (!scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/scope/moduleName : std::filesystem::path(home)/".cnpm"/moduleDirectory/moduleName;
