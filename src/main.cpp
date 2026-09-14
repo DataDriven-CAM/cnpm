@@ -37,6 +37,7 @@ int main(int argc, char** argv, char **envp) {
         std::string filename = "package.json";
         std::vector<std::string> positional;
         std::string packageName;
+        std::string filter;
         //app.set_help_flag("-h,--help", "Print this help message and exit");
         //app.set_help_all_flag("--help-all", "Expand all help");
         app.get_formatter()->column_width(25);
@@ -54,6 +55,7 @@ int main(int argc, char** argv, char **envp) {
         CLI::App &outdated = *app.add_subcommand("outdated", "Check for outdated packages");
         CLI::App &rebuild = *app.add_subcommand("rebuild", "Rebuild a package");
         rebuild.add_option("name", packageName, "package name");
+        rebuild.add_flag("--filter", filter, "Filter packages");
         CLI::App &remove = *app.add_subcommand("remove", "Removes packages from cpp_modules and from the project's package.json")->alias("rm");
         remove.add_option("name", packageName, "package name");
         remove.add_flag("-D,--save-dev", dev, "Save package to your 'devDependencies'");
@@ -61,6 +63,7 @@ int main(int argc, char** argv, char **envp) {
         CLI::App &prefix = *app.add_subcommand("prefix", "Display prefix");
         prefix.add_flag("-g,--global", global, "Display global prefix'");
         CLI::App &test = *app.add_subcommand("test", R"(Runs a package's "test" script, if one was provided)")->alias("t");
+        test.add_flag("--filter", filter, "Filter packages");
         CLI::App &install_test = *app.add_subcommand("install-test", R"(Runs a cnpm install followed immediately by a cnpm test)")->alias("it");
         app.set_config("--config", cnpmHome+"/config.toml", "Read a toml file");
         app.add_option("module-directory")->group("");
@@ -84,8 +87,76 @@ int main(int argc, char** argv, char **envp) {
         const auto [first, last] = std::ranges::remove_if(positional, [&filename](std::string& s){return s.compare(filename)==0;});
         positional.erase(first, last);
 
+        sylvanmats::npm::graphs::Relational relationalGraph;
+        std::vector<std::filesystem::path> packages;
+        sylvanmats::io::json::Path monorepoWorkspaces;//="workspaces/*"_jp;
+        monorepoWorkspaces["workspaces"]["*"];
+        std::vector<std::string_view> workspaces;
+        std::filesystem::path packageRootPath=filename;
+        sylvanmats::io::json::Binder jsonRootBinder;
+        if(std::filesystem::exists(packageRootPath)){
+            std::ifstream is(packageRootPath);
+            std::string jsonContent((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+            jsonRootBinder(jsonContent);
+            jsonRootBinder(monorepoWorkspaces, [&workspaces](const sylvanmats::io::json::JsonValue& v){
+                if(auto pVal = std::get_if<std::string_view>(&v)) {
+                    workspaces.push_back(*pVal);
+                }
+            });
+        }
+        if(workspaces.size()>0){
+            std::cout<<"workspaces: "<<std::endl;
+            for(auto& w : workspaces){
+                std::cout<<"\t"<<w<<std::endl;
+            }
+            for(auto& w : workspaces){
+                std::cout<<"installing workspace "<<w<<std::endl;
+                sylvanmats::io::json::Path jp;
+                jp["dependencies"];
+                bool recursive=false;
+                bool wildcard=false;
+                if(w.ends_with("/**")){
+                    w=w.substr(0, w.length()-3);
+                    recursive=true;
+                }
+                else if(w.ends_with("/*")){
+                    w=w.substr(0, w.length()-2);
+                    wildcard=true;
+                }
+                std::filesystem::path searchDirectory = packageRootPath.parent_path() / w;
+                // std::cout<<"searchDirectory "<<searchDirectory<<std::endl;
+                if (std::filesystem::exists(searchDirectory) && std::filesystem::is_directory(searchDirectory)) {
+                    for (const auto& entry : std::filesystem::directory_iterator(searchDirectory)) {
+                        // std::cout << "\t\tSearching for workspace package: " << entry.path() << std::endl;
+                        if(entry.is_directory()){
+                            std::filesystem::path packagePath=entry.path()/"package.json";
+                            if(std::filesystem::exists(packagePath)){
+                                // std::cout << "\t\tWorkspace package found: " << entry.path() << std::endl;
+                                packages.push_back(packagePath);
+                                // std::filesystem::path searchDirectory = packagePath.parent_path();
+                                // if (recursive && std::filesystem::exists(searchDirectory) && std::filesystem::is_directory(searchDirectory)) {
+                                //     for (const auto& entry : std::filesystem::recursive_directory_iterator(searchDirectory)) {
+                                //         std::cout << "\t\tSearching for workspace package: " << entry.path() << std::endl;
+                                //         if (entry.is_regular_file() && entry.path().filename() == "package.json") {
+                                //             std::cout << "\t\tWorkspace package found: " << entry.path().parent_path() << std::endl;
+                                //         }
+                                //     }
+                                // }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else packages.push_back(filename);
+
+        std::filesystem::path currentDirectory=std::filesystem::current_path();
+        currentDirectory=std::filesystem::canonical(currentDirectory);
+        for(std::filesystem::path& packagePath : packages){
+        std::filesystem::path modulePath=currentDirectory/moduleDirectory;
+        if(!std::filesystem::exists(modulePath))std::filesystem::create_directories(modulePath);
+        std::string moduleStrPath=modulePath.string();
         sylvanmats::io::json::Binder jsonBinder;
-        std::filesystem::path packagePath=filename;
         if(init && !std::filesystem::exists(packagePath)){
             sylvanmats::npm::Initialization initialization;
             initialization(packageName, jsonBinder);
@@ -200,71 +271,6 @@ int main(int argc, char** argv, char **envp) {
         }
 
         if(install || install_test || updateit){
-            sylvanmats::npm::graphs::Relational relationalGraph;
-            sylvanmats::io::json::Path monorepoWorkspaces;//="workspaces/*"_jp;
-            monorepoWorkspaces["workspaces"]["*"];
-            std::vector<std::string_view> workspaces;
-            jsonBinder(monorepoWorkspaces, [&workspaces](const sylvanmats::io::json::JsonValue& v){
-                if(auto pVal = std::get_if<std::string_view>(&v)) {
-                    workspaces.push_back(*pVal);
-                }
-            });
-            if(workspaces.size()>0){
-                std::cout<<"workspaces: "<<std::endl;
-                for(auto& w : workspaces){
-                    std::cout<<"\t"<<w<<std::endl;
-                }
-                for(auto& w : workspaces){
-                    std::cout<<"installing workspace "<<w<<std::endl;
-                    sylvanmats::io::json::Path jp;
-                    jp["dependencies"];
-                    bool recursive=false;
-                    bool wildcard=false;
-                    if(w.ends_with("/**")){
-                        w=w.substr(0, w.length()-3);
-                        recursive=true;
-                    }
-                    else if(w.ends_with("/*")){
-                        w=w.substr(0, w.length()-2);
-                        wildcard=true;
-                    }
-                    std::filesystem::path searchDirectory = packagePath.parent_path() / w;
-                    // std::cout<<"searchDirectory "<<searchDirectory<<std::endl;
-                    if (std::filesystem::exists(searchDirectory) && std::filesystem::is_directory(searchDirectory)) {
-                        for (const auto& entry : std::filesystem::directory_iterator(searchDirectory)) {
-                            // std::cout << "\t\tSearching for workspace package: " << entry.path() << std::endl;
-                            if(entry.is_directory()){
-                                std::filesystem::path packagePath=entry.path()/"package.json";
-                                if(std::filesystem::exists(packagePath)){
-                                    // std::cout << "\t\tWorkspace package found: " << entry.path() << std::endl;
-                                    sylvanmats::io::json::Binder jsonPackageBinder;
-                                    std::ifstream isPP(packagePath);
-                                    jsonPackageBinder(isPP);
-                                    sylvanmats::io::json::Path jp;
-                                    jp["dependencies"];
-                                    std::filesystem::path currentDirectory=std::filesystem::current_path();
-                                    currentDirectory=std::filesystem::canonical(currentDirectory);
-                                    std::filesystem::path modulePath=currentDirectory/moduleDirectory;
-                                    if(!std::filesystem::exists(modulePath))std::filesystem::create_directories(modulePath);
-                                    std::string moduleStrPath=modulePath.string();
-                                    sylvanmats::npm::Installation installation( moduleStrPath, timeout, jp, relationalGraph);
-                                    installation(jsonPackageBinder);
-                                    std::filesystem::path searchDirectory = packagePath.parent_path();
-                                    if (recursive && std::filesystem::exists(searchDirectory) && std::filesystem::is_directory(searchDirectory)) {
-                                        for (const auto& entry : std::filesystem::recursive_directory_iterator(searchDirectory)) {
-                                            std::cout << "\t\tSearching for workspace package: " << entry.path() << std::endl;
-                                            if (entry.is_regular_file() && entry.path().filename() == "package.json") {
-                                                std::cout << "\t\tWorkspace package found: " << entry.path().parent_path() << std::endl;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else {
                 sylvanmats::io::json::Path jpName;
                 jpName["name"];
                 jsonBinder(jpName, [&relationalGraph](const sylvanmats::io::json::JsonValue& v){
@@ -276,31 +282,39 @@ int main(int argc, char** argv, char **envp) {
                 sylvanmats::io::json::Path jp;
                 jp["dependencies"];
                 std::cout<<"jp dependencies"<<jp<<std::endl;
-                sylvanmats::npm::Installation installation(moduleDirectory, timeout, jp, relationalGraph);
+                sylvanmats::npm::Installation installation(moduleStrPath, timeout, jp, relationalGraph);
                 installation(jsonBinder);
                 // sylvanmats::io::json::Path jp2;
                 // jp2["devDependencies"];
-                // sylvanmats::npm::Installation installation2(moduleDirectory, timeout, jp2, relationalGraph);
+                // sylvanmats::npm::Installation installation2(moduleStrPath, timeout, jp2, relationalGraph);
                 // installation2(jsonBinder);
-            }
             std::ofstream o("relationalGraph.json");
             o<<relationalGraph;
             o.close();
         }
         if(test || install_test){
-            sylvanmats::io::json::Path jp;
-            jp["scripts"];
-            jsonBinder(jp, [](std::string_view key, const sylvanmats::io::json::JsonValue& val){
-                if(key.compare("test")==0){
-                    if(auto pVal = std::get_if<std::string_view>(&val)) {
-                        std::string command{*pVal};
-                        replace(command, "\\\"", "\"");
-                        std::cout<<"\ttest : " << command << std::endl;
-                        int status=system(command.c_str());
-                        std::cout<<"\t"<<key << " : " << status << std::endl;
-                    }
+            if(!filter.empty()){
+            }
+            {
+                std::filesystem::path pushDir = std::filesystem::current_path();
+                if (packagePath.has_parent_path() && !packagePath.parent_path().empty()) {
+                    std::filesystem::current_path(packagePath.parent_path());
                 }
-            });
+                sylvanmats::io::json::Path jp;
+                jp["scripts"];
+                jsonBinder(jp, [](std::string_view key, const sylvanmats::io::json::JsonValue& val){
+                    if(key.compare("test")==0){
+                        if(auto pVal = std::get_if<std::string_view>(&val)) {
+                            std::string command{*pVal};
+                            replace(command, "\\\"", "\"");
+                            std::cout<<"\ttest : " << command << std::endl;
+                            int status=system(command.c_str());
+                            std::cout<<"\t"<<key << " : " << status << std::endl;
+                        }
+                    }
+                });
+                std::filesystem::current_path(pushDir);
+            }
 
         }
         for(auto& o : positional){
@@ -320,6 +334,7 @@ int main(int argc, char** argv, char **envp) {
                     }
                 }
             });
+        }
         }
     }
     catch(std::filesystem::filesystem_error &e) {

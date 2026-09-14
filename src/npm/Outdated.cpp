@@ -24,12 +24,15 @@ namespace sylvanmats::npm{
         jpName["name"];
         std::string_view currentPackageName;
         jb(jpName, [&currentPackageName](const sylvanmats::io::json::JsonValue& v){
-            currentPackageName=std::any_cast<std::string_view>(v);
+            if(auto pVal = std::get_if<std::string_view>(&v)) {
+                currentPackageName=*pVal;
+            }
         });
         std::cout<<" currentPackageName "<<currentPackageName<<std::endl;
         jb(type, [&](std::string_view key, const sylvanmats::io::json::JsonValue& v){
-            std::cout<<key<<" : "<<std::any_cast<std::string_view>(v)<<std::endl;//<<" "<<v.type().name()
-            std::string_view val{std::any_cast<std::string_view>(v)};
+            if(auto pVal = std::get_if<std::string_view>(&v)) {
+            std::string_view val=*pVal;
+            std::cout<<key<<" : "<<val<<std::endl;//<<" "<<v.type().name()
             url::Url url(std::string{val});
 //            std::cout<<"\t"<<url.has_scheme()<<" "<<url.syntax_ok()<<" "<<url.valid_host()<<" |" << url.host()<<"| "<<url.path()<<std::endl;
             bool hitVersion=false;
@@ -56,6 +59,7 @@ namespace sylvanmats::npm{
                     
                 });
             }
+        }
         });
     }
 }
