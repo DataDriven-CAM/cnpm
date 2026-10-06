@@ -49,8 +49,8 @@ namespace sylvanmats::npm::schedules{
                         std::filesystem::path localPath= (!prop.scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/prop.scope/prop.module_name : std::filesystem::path(home)/".cnpm"/moduleDirectory/prop.module_name;
                             
                     std::string uri = (!prop.scope.empty()) 
-                        ? "https://npmjs.org@" + prop.scope + "/" + prop.module_name + "/-/" + prop.module_name + "-" + prop.wildcard + ".tgz" 
-                        : "https://npmjs.org" + prop.module_name + "/-/" + prop.module_name + "-" + prop.wildcard + ".tgz";
+                        ? "https://registry.npmjs.org/@" + prop.scope + "/" + prop.module_name + "/-/" + prop.module_name + "-" + prop.wildcard + ".tgz" 
+                        : "https://registry.npmjs.org/" + prop.module_name + "/-/" + prop.module_name + "-" + prop.wildcard + ".tgz";
 
                         std::string fileName=prop.module_name+"-"+prop.wildcard+".tgz";
                     std::filesystem::path tmpPath=std::filesystem::temp_directory_path()/fileName;
@@ -60,7 +60,7 @@ namespace sylvanmats::npm::schedules{
                         "--fail",                     // Hard fail on HTTP errors (e.g., 404, 500)
                         "--connect-timeout", "10",    // Don't stall a worker thread indefinitely
                         uri,                          // The target download link
-                        "-o", tmpPath.string()        // Target file destination
+                        "-o", tmpPath.native_encoded_string()        // Target file destination
                     };
 
                     // Launch non-blocking process hook instead of blocking std::system
@@ -71,11 +71,11 @@ namespace sylvanmats::npm::schedules{
                         tgzDecompressor(tmpPath, [&](std::filesystem::path& newPath, std::ostream& content){
                             if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
                             if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);
-                            localPath/=newPath;
-//                            std::cout<<" "<<localPath.parent_path()<<" "<<localPath.filename()<<" "<<content.tellp()<<std::endl;
-                            if(!std::filesystem::exists(localPath.parent_path()))std::filesystem::create_directories(localPath.parent_path());
-                            if(!std::filesystem::exists(localPath)){
-                                std::ofstream innerFile(localPath.c_str(), std::ios::binary);
+                            std::filesystem::path filePath=localPath/newPath;
+//                           std::cout<<" "<<filePath.parent_path()<<" "<<filePath.filename()<<" "<<content.tellp()<<std::endl;
+                            if(!std::filesystem::exists(filePath.parent_path()))std::filesystem::create_directories(filePath.parent_path());
+                            if(!std::filesystem::exists(filePath)){
+                                std::ofstream innerFile(filePath.c_str(), std::ios::binary);
                                 std::istream is(dynamic_cast<std::stringbuf*>(content.rdbuf()));
                                 innerFile<<dynamic_cast<std::stringbuf*>(content.rdbuf())->str();
                                 innerFile.flush();

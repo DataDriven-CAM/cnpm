@@ -86,15 +86,15 @@ namespace sylvanmats::npm{
                 if(!std::filesystem::exists(localLinkPath)){
                     sylvanmats::npm::utils::SemanticVersioning semanticVersioning;
                     if(semanticVersioning(val, [&](std::string_view base, std::string_view branch, std::string_view wildcard){
-                        // std::cout << val << " version " << base<< " "<< wildcard << '\n';
+                        // std::cout << val << " version " << base<<" branch: "<<branch<< " "<< wildcard << '\n';
                         std::filesystem::path localPath=(!scope.empty()) ? home+"/.cnpm/"+moduleDirectory+"/"+scope+"/"+moduleName+"-"+std::string(base) : home+"/.cnpm/"+moduleDirectory+"/"+moduleName+"-"+std::string(base);
-                            relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, (!branch.empty())? "https://github.com/"+std::string(base): "", scope, std::string(moduleName), std::string(branch), std::string(wildcard), std::filesystem::exists(localPath), type.front().label.starts_with("dev")});
+                            relationalGraph(sylvanmats::npm::graphs::project_properties{.name=key, .description=val, .url=(!base.empty())? "https://registry.npmjs.org/"+moduleName+"/-/"+moduleName+"-"+std::string(base)+".tgz": "", .scope=scope, .module_name=moduleName, .branch=std::string(branch), .wildcard=std::string(base), .already_have_it=std::filesystem::exists(localPath), .is_dev=type.front().label.starts_with("dev")});
                             relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
                         hitVersion=std::filesystem::exists(localPath) && std::filesystem::exists(localLinkPath);
                     })){}
                     else{
                         std::filesystem::path localPath= (!scope.empty())? std::filesystem::path(home)/".cnpm"/moduleDirectory/scope/moduleName : std::filesystem::path(home)/".cnpm"/moduleDirectory/moduleName;
-                        relationalGraph(sylvanmats::npm::graphs::project_properties{key, val, "https://github.com/"+std::string(val)+".git", "", moduleName, "", "", std::filesystem::exists(localPath), type.front().label.starts_with("dev")});
+                        relationalGraph(sylvanmats::npm::graphs::project_properties{.name=key, .description=val, .url="https://github.com/"+std::string(val)+".git", .scope="", .module_name=moduleName, .branch="", .wildcard="", .already_have_it=std::filesystem::exists(localPath), .is_dev=type.front().label.starts_with("dev")});
                         relationalGraph(current_source, relationalGraph.getNumberOfProjects()-1);
                         if(!std::filesystem::exists(localLinkPath.parent_path()))std::filesystem::create_directories(localLinkPath.parent_path());
                         if(!std::filesystem::exists(localLinkPath) && std::filesystem::exists(localPath))std::filesystem::create_directory_symlink(localPath, localLinkPath);

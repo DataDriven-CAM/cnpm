@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export PATH=~/Software/gcc-dev/dist/bin:${NODE_HOME}/bin:~/Software/cmake-3.26.5/dist/bin:`pwd`/cnpm/cpp_modules/openssl/openssl/bin:$PATH
-export LD_LIBRARY_PATH=~/Software/gcc-dev/dist/lib64:`pwd`/cnpm/cpp_modules/urlcpp:`pwd`/cnpm/cpp_modules/libgit2/dist/lib:$HDF5_HOME/lib:/home/roger/Software/ActiveTcl-8.6.1/lib:$LD_LIBRARY_PATH
+export PATH=~/Software/gcc-dev/dist/bin:${NODE_HOME}/bin:~/Software/cmake-3.26.5/dist/bin:$PATH
+export LD_LIBRARY_PATH=~/Software/gcc-dev/dist/lib64:`pwd`/cnpm/cpp_modules/urlcppS:$HDF5_HOME/lib:/home/roger/Software/ActiveTcl-8.6.1/lib:$LD_LIBRARY_PATH
 mkdir -p ~/.cnpm/cpp_modules
 mkdir -p cpp_modules
 if [ ! -d ~/.cnpm/cpp_modules/urlcpp ] ; then

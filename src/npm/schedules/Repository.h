@@ -50,7 +50,7 @@ namespace sylvanmats::npm::schedules{
                 if (prop.url.starts_with("hg+")) {
                     args.push_back("clone");
                     args.push_back(prop.url);
-                    args.push_back(localPath.string());
+                    args.push_back(localPath.native_encoded_string());
                     command = "hg";
                 }
                 else {
@@ -63,7 +63,7 @@ namespace sylvanmats::npm::schedules{
                     args.push_back("1");
                     args.push_back("--no-tags");
                     args.push_back(prop.url);
-                    args.push_back(localPath.string());
+                    args.push_back(localPath.native_encoded_string());
                     command = "git";
                 }
                 if (command.empty()) {

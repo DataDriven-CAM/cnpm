@@ -7,7 +7,7 @@ ifeq ($(OS),Windows_NT)
   wincxx=-DSYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE=2 -Ic:\msys64\mingw64\x86_64-w64-mingw32\include 
 endif
 
-LDFLAGS=-Wl,-rpath,"$$ORIGIN/cpp_modules/urlcpp" -Wl,-rpath,"/home/roger/Software/gcc-dev/dist/lib64" -L./cpp_modules/stdexec -Lcpp_modules/zlib/dist/lib -l$(libprefix)z
+LDFLAGS=-Wl,-rpath,"$$ORIGIN/cpp_modules/urlcpp" -Wl,-rpath,"/home/roger/Software/gcc-dev/dist/lib64" -L./cpp_modules/stdexec -l$(libprefix)z -pthread
 LDLIBS=./cpp_modules/urlcpp/liburlcpp.a  ./cpp_modules/json-thresher/libjsonthresher.a 
 ifeq ($(OS),Windows_NT)
 LDFLAGS+= C:/Windows/System32/ws2_32.dll
@@ -20,7 +20,7 @@ build/src/npm/Initialization.o: src/npm/Initialization.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/npm/Initialization.o src/npm/Initialization.cpp
 
-CXXFLAGS=-std=c++26 -DNDEBUG -O3 -I./src -I./cpp_modules/fmt/dist/include -I./cpp_modules/expected/include -I./cpp_modules/graph-v3/include -I./cpp_modules/json-thresher/include  -I./cpp_modules/stdexec/include -I./cpp_modules/zlib/dist/include -MMD
+CXXFLAGS=-std=c++26 -DNDEBUG -O3 -pthread -I./src -I./cpp_modules/fmt/dist/include -I./cpp_modules/expected/include -I./cpp_modules/graph-v3/include -I./cpp_modules/json-thresher/include  -I./cpp_modules/stdexec/include -MMD
 build/src/npm/Installation.o: src/npm/Installation.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/npm/Installation.o src/npm/Installation.cpp
@@ -41,7 +41,7 @@ build/src/npm/Removal.o: src/npm/Removal.cpp
 	$(CXX) $(CXXFLAGS) -c -o build/src/npm/Removal.o src/npm/Removal.cpp
 
 CXXFLAGS=-std=c++26 -DNDEBUG -O3 -fconcepts -I./src -I./cpp_modules/fmt/dist/include -I./cpp_modules/expected/include -I./cpp_modules/graph-v3/include -I./cpp_modules/json-thresher/include -MMD
-build/src/npm/Outdated.o: build/src/npm/Outdated.o src/npm/Outdated.cpp
+build/src/npm/Outdated.o: src/npm/Outdated.cpp
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o build/src/npm/Outdated.o src/npm/Outdated.cpp
 
